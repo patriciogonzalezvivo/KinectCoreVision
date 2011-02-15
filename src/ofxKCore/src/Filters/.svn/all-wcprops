@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters
+END
+ShaderProgram.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters/ShaderProgram.cpp
+END
+CPUImageFilter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters/CPUImageFilter.cpp
+END
+ShaderProgram.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters/ShaderProgram.h
+END
+GPUImageFilter.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters/GPUImageFilter.cpp
+END
+CPUImageFilter.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters/CPUImageFilter.h
+END
+GPUImageFilter.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters/GPUImageFilter.h
+END
+ProcessFilters.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters/ProcessFilters.h
+END
+Filters.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Filters/Filters.h
+END

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<Filter name="Threshold">
+	<FragmentShader>shaders/threshold.fs</FragmentShader>
+	<Parameter name="Threshold" type="1" min="0.0" max="5.0"> 0.1 </Parameter>
+	<Parameter name="enabled" type="1" min="0.0" max="0.01"> 0.2 </Parameter>
+
+</Filter>

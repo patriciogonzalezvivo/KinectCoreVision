@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<Filter name="Contrast">
+	<FragmentShader>shaders/contrast.fs</FragmentShader>
+	<Parameter name="Contrast" type="1" min="0.0" max="5.0"> 2.0 </Parameter>
+	<Parameter name="Brightness" type="1" min="0.0" max="5.0"> 4.0 </Parameter>
+	<Parameter name="Invert" type="1" min="0.0" max="5.0"> 1.0 </Parameter>
+</Filter>

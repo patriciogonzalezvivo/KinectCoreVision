@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<Filter name="Copy">
+	<FragmentShader>shaders/copy.fs</FragmentShader>
+</Filter>

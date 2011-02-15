@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<section name="camera 1">
+    <subsection name="sensor">
+        <item name="auto exposure" value="0" />
+        <item name="auto gain" value="0" />
+        <item name="exposure" value="511" />
+        <item name="gain" value="0" />
+    </subsection>
+    <subsection name="transform">
+        <item name="h flip" value="0" />
+        <item name="v flip" value="0" />
+        <item name="h keystone" value="0" />
+        <item name="v keystone" value="0" />
+        <item name="x offset" value="0" />
+        <item name="y offset" value="0" />
+        <item name="rotation" value="0" />
+        <item name="zoom" value="0" />
+    </subsection>
+    <subsection name="lens correction">
+        <item name="lc" value="0" />
+        <item name="lc²" value="0" />
+        <item name="lc³" value="0" />
+        <item name="brightness" value="0" />
+    </subsection>
+</section>
+<section name="camera 2">
+    <subsection name="sensor">
+        <item name="auto exposure" value="0" />
+        <item name="auto gain" value="0" />
+        <item name="exposure" value="511" />
+        <item name="gain" value="0" />
+    </subsection>
+    <subsection name="transform">
+        <item name="h flip" value="0" />
+        <item name="v flip" value="0" />
+        <item name="h keystone" value="0" />
+        <item name="v keystone" value="0" />
+        <item name="x offset" value="0" />
+        <item name="y offset" value="0" />
+        <item name="rotation" value="0" />
+        <item name="zoom" value="0" />
+    </subsection>
+    <subsection name="lens correction">
+        <item name="lc" value="0" />
+        <item name="lc²" value="0" />
+        <item name="lc³" value="0" />
+        <item name="brightness" value="0" />
+    </subsection>
+</section>
+<section name="stitching">
+    <subsection name="cameras">
+        <item name="position" value="1" />
+        <item name="overlap" value="207" />
+    </subsection>
+</section>

@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Tracking
+END
+BlobManager.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Tracking/BlobManager.h
+END
+ContourFinder.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Tracking/ContourFinder.cpp
+END
+Tracking.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Tracking/Tracking.cpp
+END
+Blob.h
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Tracking/Blob.h
+END
+ContourFinder.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Tracking/ContourFinder.h
+END
+Tracking.h
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Tracking/Tracking.h
+END
+BlobManager.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Tracking/BlobManager.cpp
+END

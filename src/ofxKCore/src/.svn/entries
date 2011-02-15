@@ -1,0 +1,89 @@
+10
+
+dir
+9
+http://nuicode.svnrepository.com/svn/ccv/Community%20Core%20Vision/Linux/addons/ofxNCore/src
+http://nuicode.svnrepository.com/svn/ccv
+
+
+
+2010-10-21T02:38:16.795458Z
+9
+amit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+19d3fd59-c1c5-47ee-bd00-77257ac5affa
+
+Tracking
+dir
+
+Controls
+dir
+
+Events
+dir
+
+Communication
+dir
+
+Calibration
+dir
+
+Camera
+dir
+
+Filters
+dir
+
+Modules
+dir
+
+ofxNCore.h
+file
+
+
+
+
+2010-10-23T17:30:17.000000Z
+c77953da195af47512e22d0913fefc44
+2010-10-21T02:38:16.795458Z
+9
+amit
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+2586
+
+Templates
+dir
+

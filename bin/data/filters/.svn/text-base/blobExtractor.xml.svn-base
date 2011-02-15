@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<Filter name="Contrast">
+	<VertexShader>shaders/minimal.vs</VertexShader>
+	
+	<FragmentShader>shaders/blobDetector.fs</FragmentShader>
+
+<Parameter name="threads" type="0.0" min="0.0" max="100.0"> 64.0 </Parameter>
+
+</Filter>
+

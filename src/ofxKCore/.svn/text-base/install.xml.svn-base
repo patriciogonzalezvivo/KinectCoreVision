@@ -1,0 +1,36 @@
+<install>
+	
+	<version>1.0.1</version>
+	<author>nuigroup</author>
+	<url>http://ncore.nuigroup.com/</url>
+	<requires></requires>
+	
+	<add>	
+		<!-- 	=====================================================================	-->
+		<!--	========================== add for the "installation" of OF =========	-->
+		<!-- 	=====================================================================	-->
+	
+		<addons_h>
+		//--------------------------------------------- ofxNCore
+		#ifdef OF_ADDON_USING_OFXCCORE
+			#include "ofxCCore.h"
+		#endif 
+		</addons_h>
+		
+		<!-- 	=====================================================================	-->
+		<!--	========================== add per project using this addon =========	-->
+		<!-- 	=====================================================================	-->
+	
+		<src>
+			<folder name="addons/ofxNCore/src">
+				<file>../../../put all filesand folders here...</file>
+			</folder>
+		</src>
+		
+		<include>
+			<path>../../../put include folders here...</path>
+		</include>
+		
+	</add>
+	 
+</install>

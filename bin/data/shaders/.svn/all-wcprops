@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders
+END
+blobDetector.fs
+K 25
+svn:wc:ra_dav:version-url
+V 121
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/blobDetector.fs
+END
+gaussV.fs
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/gaussV.fs
+END
+copy.fs
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/copy.fs
+END
+gaussH.fs
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/gaussH.fs
+END
+grayScale.fs
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/grayScale.fs
+END
+blobExtractor.gs
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/blobExtractor.gs
+END
+inverse.fs
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/inverse.fs
+END
+threshold.fs
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/threshold.fs
+END
+absSubtract.fs
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/absSubtract.fs
+END
+contrast.fs
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/contrast.fs
+END
+minimal.vs
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/minimal.vs
+END
+subtract.fs
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/apps/addonsExamples/Codeblocks_32bit/bin/data/shaders/subtract.fs
+END

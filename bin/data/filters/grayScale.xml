@@ -1,0 +1,4 @@
+<?xml version="1.0" ?>
+<Filter name="GrayScale">
+	<FragmentShader>shaders/grayScale.fs</FragmentShader>
+</Filter>

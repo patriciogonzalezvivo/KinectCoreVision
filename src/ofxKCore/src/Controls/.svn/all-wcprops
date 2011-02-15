@@ -1,0 +1,197 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls
+END
+ofxGuiPoints.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiPoints.cpp
+END
+ofxGuiColor.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiColor.h
+END
+ofxGui.h
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGui.h
+END
+ofxGuiSlider.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiSlider.h
+END
+ofxGuiGlobals.h
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiGlobals.h
+END
+ofxGuiRadar.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiRadar.cpp
+END
+ofxGuiXYPad.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiXYPad.h
+END
+ofxGuiKnob.h
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiKnob.h
+END
+ofxGuiPanel.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiPanel.cpp
+END
+ofxGuiFiles.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiFiles.cpp
+END
+ofxGuiMatrix.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiMatrix.cpp
+END
+ofxGuiSwitch.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiSwitch.h
+END
+ofxGuiTypes.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiTypes.h
+END
+ofxGuiObject.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiObject.h
+END
+ofxGuiScope.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiScope.h
+END
+ofxGuiColor.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiColor.cpp
+END
+ofxGui.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGui.cpp
+END
+ofxGuiButton.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiButton.h
+END
+ofxGuiPoints.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiPoints.h
+END
+ofxGuiSlider.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiSlider.cpp
+END
+ofxGuiGlobals.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiGlobals.cpp
+END
+ofxGuiXYPad.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiXYPad.cpp
+END
+ofxGuiKnob.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiKnob.cpp
+END
+ofxGuiRadar.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiRadar.h
+END
+ofxGuiSwitch.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiSwitch.cpp
+END
+ofxGuiPanel.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiPanel.h
+END
+ofxGuiObject.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiObject.cpp
+END
+gui.h
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/gui.h
+END
+ofxGuiFiles.h
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiFiles.h
+END
+ofxGuiScope.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiScope.cpp
+END
+ofxGuiMatrix.h
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiMatrix.h
+END
+ofxGuiButton.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ccv/!svn/ver/9/Community%20Core%20Vision/Linux/addons/ofxNCore/src/Controls/ofxGuiButton.cpp
+END
