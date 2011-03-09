@@ -23,13 +23,12 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 	nearThreshold = 50;
 	farThreshold  = 180;
 	
-	
 	//set the title
 	ofSetWindowTitle("Kinect Vision based on CCV v 1.4");
 
 	//create filter
-	if(filter == NULL)	filter = new ProcessFilters();
-	//if ( filter_fiducial == NULL ){filter_fiducial = new ProcessFilters();}
+	if(filter == NULL)	
+		filter = new ProcessFilters();
 
 	//Load Settings from config.xml file
 	loadXMLSettings();
@@ -55,8 +54,6 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 	ofSetWindowShape(winWidth,winHeight);
 	ofSetVerticalSync(false);	            //Set vertical sync to false for better performance?
 
-	//printf("Application Loaded...\n?");
-
 	//load camera/video
 	initDevice();
 	printf("Kinect Initialised...\n");
@@ -73,9 +70,7 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 	sourceImg.setUseTexture(false);				//We don't need to draw this so don't create a texture
 
 	//Fiducial Images
-	//processedImg_fiducial.allocate(camWidth, camHeight); //main Image that'll be processed.
-	//processedImg_fiducial.setUseTexture(false);                        //We don't need to draw this so don't create a texture
-	undistortedImg.allocate(camWidth, camHeight);
+	undistortedImg.allocate(camWidth, camHeight);		// ES NECESARIO???
 	/******************************************************************************************************/
 
 	//Fonts - Is there a way to dynamically change font size?
@@ -94,15 +89,7 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 
 	//Allocate Filters
 	filter->allocate( camWidth, camHeight );
-	//filter_fiducial->allocate( camWidth, camHeight );
-
-	//Fiducial Initialisation
-
-	// factor for Fiducial Drawing. The ImageSize is hardcoded 320x240 Pixel!(Look at ProcessFilters.h at the draw() Method
-	//fiducialDrawFactor_Width = 320 / static_cast<float>(filter->camWidth);//camWidth;
-	//fiducialDrawFactor_Height = 240 / static_cast<float>(filter->camHeight);//camHeight;
-
-
+	
 	/*****************************************************************************************************
 	* Startup Modes
 	******************************************************************************************************/
@@ -132,7 +119,6 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 	}
 
 	contourFinder.setTemplateUtils(&templates);
-	//tracker.passInFiducialInfo(&fidfinder);
 
 	printf("Community Core Vision is setup!\n\n");
 }
@@ -162,7 +148,6 @@ void ofxKCoreVision::loadXMLSettings()
 	filter->bLearnBakground		= XML.getValue("CONFIG:BOOLEAN:LEARNBG",0);
 	filter->bVerticalMirror		= XML.getValue("CONFIG:BOOLEAN:VMIRROR",0);
 	filter->bHorizontalMirror	= XML.getValue("CONFIG:BOOLEAN:HMIRROR",0);
-
 	
 	nearThreshold				= XML.getValue("CONFIG:KINECT:NEAR",0);
 	farThreshold				= XML.getValue("CONFIG:KINECT:FAR",100);
@@ -190,11 +175,13 @@ void ofxKCoreVision::loadXMLSettings()
 	filter->smooth				= XML.getValue("CONFIG:INT:SMOOTH",0);
 	minTempArea					= XML.getValue("CONFIG:INT:MINTEMPAREA",0);
 	maxTempArea					= XML.getValue("CONFIG:INT:MAXTEMPAREA",0);
+	hullPress					= XML.getValue("CONFIG:INT:HULLPRESS",20.0);
+	
 	//Tracking Options
-	contourFinder.bTrackFingers				= XML.getValue("CONFIG:BOOLEAN:TRACKFINGERS",0);
-	contourFinder.bTrackObjects				= XML.getValue("CONFIG:BOOLEAN:TRACKOBJECTS",0);
-	//contourFinder.bTrackFiducials			= XML.getValue("CONFIG:BOOLEAN:TRACKFIDUCIALS",0);
-
+	contourFinder.bTrackBlobs	= XML.getValue("CONFIG:BOOLEAN:TRACKBLOBS",0);
+	contourFinder.bTrackFingers	= XML.getValue("CONFIG:BOOLEAN:TRACKFINGERS",0);
+	contourFinder.bTrackObjects	= XML.getValue("CONFIG:BOOLEAN:TRACKOBJECTS",0);
+	
 	//NETWORK SETTINGS
 	bTUIOMode					= XML.getValue("CONFIG:BOOLEAN:TUIO",0);
 	myTUIO.bOSCMode				= XML.getValue("CONFIG:BOOLEAN:OSCMODE",1);
@@ -207,24 +194,6 @@ void ofxKCoreVision::loadXMLSettings()
 	myTUIO.setup(tmpLocalHost.c_str(), tmpPort, tmpFlashPort); //have to convert tmpLocalHost to a const char*
 	//--------------------------------------------------------------
 	//  END XML SETUP
-
-	//Filter for Fiducial setup
-	/*filter_fiducial->bLearnBackground        = false;
-	filter_fiducial->bVerticalMirror        = filter->bVerticalMirror;
-	filter_fiducial->bHorizontalMirror        = filter->bHorizontalMirror;
-	filter_fiducial->bTrackDark               = filter->bTrackDark;
-//^^ did not want to hardcode this , but these will not be any use of this.
-
-	filter_fiducial->bHighpass				= XML.getValue("CONFIG:FIDUCIAL:HIGHPASS", 0);
-	filter_fiducial->bAmplify				= XML.getValue("CONFIG:FIDUCIAL:AMPLIFY", 0);
-	filter_fiducial->bSmooth				= XML.getValue("CONFIG:FIDUCIAL:SMOOTH", 0);
-
-	filter_fiducial->threshold				= XML.getValue("CONFIG:FIDUCIAL:THRESHOLD", 0);
-	filter_fiducial->highpassBlur			= XML.getValue("CONFIG:FIDUCIAL:HIGHPASSBLUR", 0);
-	filter_fiducial->highpassNoise			= XML.getValue("CONFIG:FIDUCIAL:HIGHPASSNOISE", 0);
-	filter_fiducial->highpassAmp			= XML.getValue("CONFIG:FIDUCIAL:HIGHPASSAMP", 0);
-	filter_fiducial->smooth					= XML.getValue("CONFIG:FIDUCIAL:SMOOTHVALUE", 0);
-	 */
 }
 
 void ofxKCoreVision::saveSettings(){
@@ -253,35 +222,25 @@ void ofxKCoreVision::saveSettings(){
 	XML.setValue("CONFIG:INT:HIGHPASSNOISE", filter->highpassNoise);
 	XML.setValue("CONFIG:INT:HIGHPASSAMP", filter->highpassAmp);
 	XML.setValue("CONFIG:INT:SMOOTH", filter->smooth);
-	//XML.setValue("CONFIG:INT:MINTEMPAREA", minTempArea);
-	//XML.setValue("CONFIG:INT:MAXTEMPAREA", maxTempArea);
+	XML.setValue("CONFIG:INT:MINTEMPAREA", minTempArea);
+	XML.setValue("CONFIG:INT:MAXTEMPAREA", maxTempArea);
+	XML.setValue("CONFIG:INT:HULLPRESS", hullPress);
 	XML.setValue("CONFIG:BOOLEAN:MINIMODE", bMiniMode);
 	XML.setValue("CONFIG:BOOLEAN:TUIO",bTUIOMode);
+	XML.setValue("CONFIG:BOOLEAN:TRACKBLOBS",contourFinder.bTrackBlobs);
 	XML.setValue("CONFIG:BOOLEAN:TRACKFINGERS",contourFinder.bTrackFingers);
 	XML.setValue("CONFIG:BOOLEAN:TRACKOBJECTS",contourFinder.bTrackObjects);
-	//XML.setValue("CONFIG:BOOLEAN:TRACKFIDUCIALS",contourFinder.bTrackFiducials);
 	XML.setValue("CONFIG:BOOLEAN:HEIGHTWIDTH", myTUIO.bHeightWidth);
 	XML.setValue("CONFIG:BOOLEAN:OSCMODE", myTUIO.bOSCMode);
 	XML.setValue("CONFIG:BOOLEAN:TCPMODE", myTUIO.bTCPMode);
 	XML.setValue("CONFIG:BOOLEAN:BINMODE", myTUIO.bBinaryMode);
-
-	//XML.setValue("CONFIG:FIDUCIAL:HIGHPASS", filter_fiducial->bHighpass);
-	//XML.setValue("CONFIG:FIDUCIAL:AMPLIFY", filter_fiducial->bAmplify);
-	//XML.setValue("CONFIG:FIDUCIAL:SMOOTH", filter_fiducial->bSmooth);
-
-	//XML.setValue("CONFIG:FIDUCIAL:THRESHOLD", filter_fiducial->threshold);
-	//XML.setValue("CONFIG:FIDUCIAL:HIGHPASSBLUR", filter_fiducial->highpassBlur);
-	//XML.setValue("CONFIG:FIDUCIAL:HIGHPASSNOISE", filter_fiducial->highpassNoise);
-	//XML.setValue("CONFIG:FIDUCIAL:HIGHPASSAMP", filter_fiducial->highpassAmp);
-	//XML.setValue("CONFIG:FIDUCIAL:SMOOTHVALUE", filter_fiducial->smooth);
-
 	XML.saveFile("config.xml");
 }
 
 /************************************************
 *				Init Device
 ************************************************/
-//Init Device (camera/video)
+//Init Device (Kinect)
 void ofxKCoreVision::initDevice(){
 	//save/update log file
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
@@ -324,31 +283,16 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 		if (bGPUMode){
 			grabFrameToGPU(filter->gpuSourceTex);
 			filter->applyGPUFilters();
-			contourFinder.findContours(filter->gpuReadBackImageGS,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, false);
-
-			//if(contourFinder.bTrackFiducials){
-				//grabFrameToGPU(filter_fiducial->gpuSourceTex);
-				//filter_fiducial->applyGPUFilters();
-				//fidfinder.findFiducials( filter_fiducial->gpuReadBackImageGS );
-			//}
+			contourFinder.findContours(filter->gpuReadBackImageGS,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress , false);
 		} else {
 			grabFrameToCPU();
 			filter->applyCPUFilters( processedImg );
-			contourFinder.findContours(processedImg,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, false);
-
-			//if(contourFinder.bTrackFiducials){
-			//	filter_fiducial->applyCPUFilters( processedImg_fiducial );
-			//	fidfinder.findFiducials( processedImg_fiducial );
-			//}
+			contourFinder.findContours(processedImg,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress, false);
 		}
 
 		//If Object tracking or Finger tracking is enabled
-		if(contourFinder.bTrackFingers || contourFinder.bTrackObjects)
+		if( contourFinder.bTrackBlobs || contourFinder.bTrackFingers || contourFinder.bTrackObjects)
 			tracker.track(&contourFinder);
-
-		//Map Fiducials from camera to screen position
-		/*if(contourFinder.bTrackFiducials)
-			tracker.doFiducialCalculation();*/
 
 		//get DSP time
 		differenceTime = ofGetElapsedTimeMillis() - beforeTime;
@@ -356,15 +300,14 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 		//Dynamic Background subtraction LearRate
 			if (filter->bDynamicBG){
 			filter->fLearnRate = backgroundLearnRate * .0001; //If there are no blobs, add the background faster.
-			if (contourFinder.nBlobs > 0) //If there ARE blobs, add the background slower.
+			if ((contourFinder.nBlobs > 0 )|| (contourFinder.nFingers > 0 ) ) //If there ARE blobs, add the background slower.
 				filter->fLearnRate = backgroundLearnRate * .0001;
 		}//End Background Learning rate
 
 		//Sending TUIO messages
 		if (myTUIO.bOSCMode || myTUIO.bTCPMode || myTUIO.bBinaryMode){
-			//printf("sending data osc : %d TCP : %d binary : %d\n", myTUIO.bOSCMode, myTUIO.bTCPMode, myTUIO.bBinaryMode);
-			myTUIO.setMode(contourFinder.bTrackFingers , contourFinder.bTrackObjects);//, contourFinder.bTrackFiducials);
-			myTUIO.sendTUIO(&getBlobs(),&getObjects());//,&fidfinder.fiducialsList);
+			myTUIO.setMode(contourFinder.bTrackBlobs, contourFinder.bTrackFingers , contourFinder.bTrackObjects);
+			myTUIO.sendTUIO(&getBlobs(),&getFingers(),&getObjects());
 		}
 	}
 }
@@ -386,7 +329,6 @@ void ofxKCoreVision::grabFrameToCPU(){
 	//convert to grayscale
 	processedImg = grayImage;
 	sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
-	//if(contourFinder.bTrackFiducials){processedImg_fiducial = grayImage;}
 	
 }
 
@@ -465,42 +407,36 @@ void ofxKCoreVision::drawFullMode(){
 		filter->drawGPU();
 	else {
 		sourceImg.draw(30, 15, 320, 240);
-		
-		//if(!bFidMode){
-			filter->draw();
-		//} else {
-		//	filter_fiducial->draw();
-		//}
+		filter->draw();
 	}
 
 	ofSetColor(255);
 
-	string str0 = "Accel: ";
-	str0 += ofToString(kinect.getMksAccel().x,1) + "/" + ofToString(kinect.getMksAccel().y,1) + "/" + ofToString(kinect.getMksAccel().z,1) + "\n";
+	string str0 = "FPS: ";
+	str0+= ofToString(fps, 0)+"\n";
 	
 	string str1 = "Dist: ";
 	str1 += ofToString(nearThreshold) + " <-> " +  ofToString(farThreshold) + "\n";
+	
 	string str2 = "Resolution: ";
 	str2+= ofToString(camWidth, 0) + "x" + ofToString(camHeight, 0)  + "\n";
-	string str3 = "FPS: ";
-	str3+= ofToString(fps, 0)+"\n";
+	
+	//string str4 = "Processing: ";
+	//str4+= ofToString(differenceTime, 0)+" ms \n";
 
-	string str4 = "Processing: ";
-	str4+= ofToString(differenceTime, 0)+" ms \n";
-
-	string str5 = "Filter: ";
-	//if(!bFidMode)
-		str5+= "Finger/Object\n";
-	//else 
-	//	str5+= "Fiducial\n";
-
-	string str6 = "Blobs: ";
-	str6+= ofToString(contourFinder.nBlobs,0)+", "+ofToString(contourFinder.nObjects,0)+"\n";
+	string str3 = "Blobs: ";
+	str3+= ofToString(contourFinder.nBlobs,0)+", "+ofToString(contourFinder.nObjects,0)+"\n";
+	
+	string str4 = "Fingers: ";
+	str4+= ofToString(contourFinder.nFingers,0)+"\n";
+	
+	string str5 = "Accel: ";
+	str5 += ofToString(kinect.getMksAccel().x,1) + "/" + ofToString(kinect.getMksAccel().y,1) + "/" + ofToString(kinect.getMksAccel().z,1) + "\n";
 	
 	ofColor c;
 	c.setHex(0x969696);
 	ofSetColor(c);
-	verdana.drawString( str3+ str0 + str6 + str4 + str2 + str5 , 570, 430);
+	verdana.drawString( str0 + str1 + str2 + str3 + str4 + str5 , 570, 430);
 
 	
 	//TUIO data drawing
@@ -530,11 +466,14 @@ void ofxKCoreVision::drawMiniMode(){
 	//black background
 	ofSetColor(0,0,0);
 	ofRect(0,0,ofGetWidth(), ofGetHeight());
+	
 	//draw outlines
-	if (bDrawOutlines)
-	{
+	if (bDrawOutlines){
 		for (int i=0; i<contourFinder.nBlobs; i++)
 			contourFinder.blobs[i].drawContours(0,0, camWidth, camHeight+175, ofGetWidth(), ofGetHeight());
+		
+		for (int i=0; i<contourFinder.nFingers; i++)
+			contourFinder.fingers[i].drawCenter(0,0, camWidth, camHeight+175, ofGetWidth(), ofGetHeight());
 
 		for (int i=0;i<contourFinder.nObjects; i++)
 			contourFinder.objects[i].drawBox(0,0, camWidth, camHeight+175, ofGetWidth(), ofGetHeight());
@@ -552,9 +491,8 @@ void ofxKCoreVision::drawMiniMode(){
 	ofSetColor(250,250,250);
 	verdana.drawString("Calc. Time  [ms]:        " + ofToString(differenceTime,0),10, ofGetHeight() - 70 );
 	verdana.drawString("Kinect [fps]:            " + ofToString(fps,0),10, ofGetHeight() - 50 );
-	
-	verdana.drawString("Blob Count:               " + ofToString(contourFinder.nBlobs,0),10, ofGetHeight() - 29 );
-	verdana.drawString("Communication:  " ,10, ofGetHeight() - 9 );
+	//verdana.drawString("Blob Count:               " + ofToString(contourFinder.nBlobs,0),10, ofGetHeight() - 29 );
+	//verdana.drawString("Communication:  " ,10, ofGetHeight() - 9 );
 
 	//draw green tuio circle
 	if((myTUIO.bIsConnected || myTUIO.bOSCMode) && bTUIOMode)
@@ -566,16 +504,15 @@ void ofxKCoreVision::drawMiniMode(){
 	ofNoFill();
 }
 
-void ofxKCoreVision::drawFingerOutlines()
-{
+void ofxKCoreVision::drawFingerOutlines(){
+	
 	//Find the blobs for drawing
-	if(contourFinder.bTrackFingers){
-		for (int i=0; i<contourFinder.nBlobs; i++)
-		{
-			if (bDrawOutlines){
-				//Draw contours (outlines) on the source image
+	if(contourFinder.bTrackBlobs){
+		for (int i=0; i<contourFinder.nBlobs; i++){
+			
+			if (bDrawOutlines) //Draw contours (outlines) on the source image
 				contourFinder.blobs[i].drawContours(30, 15, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
-			}
+			
 			if (bShowLabels){ //Show ID label
 				float xpos = contourFinder.blobs[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);
 				float ypos = contourFinder.blobs[i].centroid.y * (MAIN_WINDOW_HEIGHT/camHeight);
@@ -584,19 +521,39 @@ void ofxKCoreVision::drawFingerOutlines()
 				char idStr[1024];
 
 				sprintf(idStr, "id: %i", contourFinder.blobs[i].id);
-
-				verdana.drawString(idStr, xpos + 365, ypos + contourFinder.blobs[i].boundingRect.height/2 + 45);
+				verdana.drawString(idStr, xpos + 365, ypos + contourFinder.blobs[i].boundingRect.height/2 + 15);
 			}
 		}
 	}
+	
+	//Find the blobs for drawing
+	if(contourFinder.bTrackFingers){
+		for (int i=0; i<contourFinder.nFingers; i++) {
+			
+			if (bDrawOutlines) //Draw contours (outlines) on the source image
+				contourFinder.fingers[i].drawCenter(30, 15, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
+			
+			if (bShowLabels){ //Show ID label
+				float xpos = contourFinder.fingers[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);
+				float ypos = contourFinder.fingers[i].centroid.y * (MAIN_WINDOW_HEIGHT/camHeight);
+				
+				ofSetColor(200,255,200);
+				char idStr[1024];
+				
+				sprintf(idStr, "id: %i", contourFinder.fingers[i].id);
+				
+				verdana.drawString(idStr, xpos + 365, ypos + contourFinder.fingers[i].boundingRect.height/2 + 15);
+			}
+		}
+	}
+	
 	//Object Drawing
 	if(contourFinder.bTrackObjects){
-		for (int i=0; i<contourFinder.nObjects; i++)
-		{
-			if (bDrawOutlines){
-				//Draw contours (outlines) on the source image
+		for (int i=0; i<contourFinder.nObjects; i++){
+			
+			if (bDrawOutlines) //Draw contours (outlines) on the source image
 				contourFinder.objects[i].drawBox(40, 30, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
-			}
+			
 			if (bShowLabels){ //Show ID label
 				float xpos = contourFinder.objects[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);
 				float ypos = contourFinder.objects[i].centroid.y * (MAIN_WINDOW_HEIGHT/camHeight);
@@ -615,21 +572,6 @@ void ofxKCoreVision::drawFingerOutlines()
 	ofSetColor(255);
 }
 
-/*
-void ofxKCoreVision::drawFiducials()
-{
-	for (list<ofxFiducial>::iterator fiducial = fidfinder.fiducialsList.begin(); fiducial != fidfinder.fiducialsList.end(); fiducial++)
-	{
-		fiducial->drawScaled(30,15,fiducialDrawFactor_Width,fiducialDrawFactor_Height);
-
-		fiducial->drawCornersScaled( 30, 15 ,fiducialDrawFactor_Width,fiducialDrawFactor_Height);
-
-		ofSetColor(0,0,255);
-		ofSetColor(255,255,255);
-
-	}
-}*/
-
 /*****************************************************************************
 * KEY EVENTS
 *****************************************************************************/
@@ -638,11 +580,7 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 	if (showConfiguration){
 		switch (e.key){
 		case 'b':
-			//if(!bFidMode){
 			filter->bLearnBakground = true;
-			//} else {
-			//filter_fiducial->bLearnBackground = true;
-			//}
 			break;
 		case 'o':
 			bDrawOutlines ? bDrawOutlines = false : bDrawOutlines = true;
@@ -650,12 +588,10 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 			break;
 		case 'h':
 			filter->bHorizontalMirror ? filter->bHorizontalMirror = false : filter->bHorizontalMirror = true;
-			//filter_fiducial->bHorizontalMirror ? filter_fiducial->bHorizontalMirror = false : filter_fiducial->bHorizontalMirror = true;
 			controls->update(appPtr->propertiesPanel_flipH, kofxGui_Set_Bool, &appPtr->filter->bHorizontalMirror, sizeof(bool));
 			break;
 		case 'j':
 			filter->bVerticalMirror ? filter->bVerticalMirror = false : filter->bVerticalMirror = true;
-			//filter_fiducial->bVerticalMirror ? filter_fiducial->bVerticalMirror = false : filter_fiducial->bVerticalMirror = true;
 			controls->update(appPtr->propertiesPanel_flipV, kofxGui_Set_Bool, &appPtr->filter->bVerticalMirror, sizeof(bool));
 			break;
 		case 't':
@@ -668,6 +604,8 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 			controls->update(appPtr->optionPanel_bin_tcp, kofxGui_Set_Bool, &appPtr->myTUIO.bBinaryMode, sizeof(bool));
 			//clear blobs
 //			myTUIO.blobs.clear();
+//			myTUIO.fingers.clear();
+//			myTUIO.objects.clear();
 			break;
 		case 'f':
 			myTUIO.bOSCMode = false;
@@ -679,6 +617,8 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 			controls->update(appPtr->optionPanel_bin_tcp, kofxGui_Set_Bool, &appPtr->myTUIO.bBinaryMode, sizeof(bool));
 			//clear blobs
 //			myTUIO.blobs.clear();
+//			myTUIO.fingers.clear();
+//			myTUIO.objects.clear();
 			break;
 		case 'n':
 			myTUIO.bOSCMode = false;
@@ -689,7 +629,9 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 			controls->update(appPtr->optionPanel_tuio_osc, kofxGui_Set_Bool, &appPtr->myTUIO.bOSCMode, sizeof(bool));
 			controls->update(appPtr->optionPanel_bin_tcp, kofxGui_Set_Bool, &appPtr->myTUIO.bBinaryMode, sizeof(bool));
 			//clear blobs
-			//			myTUIO.blobs.clear();
+//			myTUIO.blobs.clear();
+//			myTUIO.fingers.clear();
+//			myTUIO.objects.clear();
 			break;
 		case 'l':
 			bShowLabels ? bShowLabels = false : bShowLabels = true;
@@ -704,7 +646,6 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 				bMiniMode = false;
 				bShowInterface = true;
 				filter->bMiniMode = bMiniMode;
-				//filter_fiducial->bMiniMode = bMiniMode;
 				ofSetWindowShape(950,600); //default size
 			}
 			else if(!bCalibration)
@@ -712,116 +653,75 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 				bMiniMode = true;
 				bShowInterface = false;
 				filter->bMiniMode = bMiniMode;
-				//filter_fiducial->bMiniMode = bMiniMode;
 				ofSetWindowShape(190,200); //minimized size
 			}
 			break;
 		case 'x': //Exit Calibrating
-			if (bCalibration)
-			{	bShowInterface = true;
-			bCalibration = false;
-			calib.calibrating = false;
-			tracker.isCalibrating = false;
-			if (bFullscreen == true) ofToggleFullscreen();
-			bFullscreen = false;
+			if (bCalibration){	
+				bShowInterface = true;
+				bCalibration = false;
+				calib.calibrating = false;
+				tracker.isCalibrating = false;
+				if (bFullscreen == true) 
+					ofToggleFullscreen();
+				bFullscreen = false;
 			}
 			break;
 		case OF_KEY_RETURN: //Close Template Selection and save it
-			if( contourFinder.bTrackObjects && isSelecting )
-			{
-			isSelecting = false;
-			templates.addTemplate(rect,minRect,maxRect,camWidth/320,camHeight/240);
-			rect = ofRectangle();
-			minRect = rect;
-			maxRect = rect;
-			minTempArea = 0;
-			maxTempArea = 0;
-			controls->update(appPtr->TemplatePanel_minArea, kofxGui_Set_Float, &appPtr->minTempArea, sizeof(float));
-			controls->update(appPtr->TemplatePanel_maxArea, kofxGui_Set_Float, &appPtr->maxTempArea, sizeof(float));
+			if( contourFinder.bTrackObjects && isSelecting ){
+				isSelecting = false;
+				templates.addTemplate(rect,minRect,maxRect,camWidth/320,camHeight/240);
+				rect = ofRectangle();
+				minRect = rect;
+				maxRect = rect;
+				minTempArea = 0;
+				maxTempArea = 0;
+				controls->update(appPtr->TemplatePanel_minArea, kofxGui_Set_Float, &appPtr->minTempArea, sizeof(float));
+				controls->update(appPtr->TemplatePanel_maxArea, kofxGui_Set_Float, &appPtr->maxTempArea, sizeof(float));
 			}
 			break;
-		/*case 'i':
-			bFidMode = !bFidMode;
-
-			if(bFidMode){//Update the GUI with Fiducial Filter values
-				//Smooth
-				controls->update(appPtr->smoothPanel_use, kofxGui_Set_Bool, &appPtr->filter_fiducial->bSmooth, sizeof(bool));
-				controls->update(appPtr->smoothPanel_smooth, kofxGui_Set_Float, &appPtr->filter_fiducial->smooth, sizeof(float));
-				//Highpass
-				controls->update(appPtr->highpassPanel_use, kofxGui_Set_Bool, &appPtr->filter_fiducial->bHighpass, sizeof(bool));
-				controls->update(appPtr->highpassPanel_blur, kofxGui_Set_Float, &appPtr->filter_fiducial->highpassBlur, sizeof(float));
-				controls->update(appPtr->highpassPanel_noise, kofxGui_Set_Float, &appPtr->filter_fiducial->highpassNoise, sizeof(float));
-				//Amplify
-				controls->update(appPtr->amplifyPanel_use, kofxGui_Set_Bool, &appPtr->filter_fiducial->bAmplify, sizeof(bool));
-				controls->update(appPtr->amplifyPanel_amp, kofxGui_Set_Float, &appPtr->filter_fiducial->highpassAmp, sizeof(float));
-				//Threshold
-				controls->update(appPtr->trackedPanel_threshold, kofxGui_Set_Float, &appPtr->filter_fiducial->threshold, sizeof(float));
-			} else {//Update the GUI with normal Filter values
-				//Smooth
-				controls->update(appPtr->smoothPanel_use, kofxGui_Set_Bool, &appPtr->filter->bSmooth, sizeof(bool));
-				controls->update(appPtr->smoothPanel_smooth, kofxGui_Set_Float, &appPtr->filter->smooth, sizeof(float));
-				//Highpass
-				controls->update(appPtr->highpassPanel_use, kofxGui_Set_Bool, &appPtr->filter->bHighpass, sizeof(bool));
-				controls->update(appPtr->highpassPanel_blur, kofxGui_Set_Float, &appPtr->filter->highpassBlur, sizeof(float));
-				controls->update(appPtr->highpassPanel_noise, kofxGui_Set_Float, &appPtr->filter->highpassNoise, sizeof(float));
-				//Amplify
-				controls->update(appPtr->amplifyPanel_use, kofxGui_Set_Bool, &appPtr->filter->bAmplify, sizeof(bool));
-				controls->update(appPtr->amplifyPanel_amp, kofxGui_Set_Float, &appPtr->filter->highpassAmp, sizeof(float));
-				//Threshold
-				controls->update(appPtr->trackedPanel_threshold, kofxGui_Set_Float, &appPtr->filter->threshold, sizeof(float));
-			}
-			//TODO:Update the GUI
-			break;*/
-		
-			case '>':
-			case '.':
-				farThreshold ++;
-				if (farThreshold > 255) farThreshold = 255;
-				break;
-			case '<':		
-			case ',':		
-				farThreshold --;
-				if (farThreshold < 0) farThreshold = 0;
-				break;
+		case '>':
+		case '.':
+			farThreshold ++;
+			if (farThreshold > 255) farThreshold = 255;
+			break;
+		case '<':		
+		case ',':		
+			farThreshold --;
+			if (farThreshold < 0) farThreshold = 0;
+			break;
 				
-			case '+':
-			case '=':
-				nearThreshold ++;
-				if (nearThreshold > 255) nearThreshold = 255;
-				break;
-			case '-':		
-				nearThreshold --;
-				if (nearThreshold < 0) nearThreshold = 0;
-				break;
-			/*case 'w':
-				kinect.enableDepthNearValueWhite(!(kinect.isDepthNearValueWhite()));
-				break;*/
+		case '+':
+		case '=':
+			nearThreshold ++;
+			if (nearThreshold > 255) nearThreshold = 255;
+			break;
+		case '-':		
+			nearThreshold --;
+			if (nearThreshold < 0) nearThreshold = 0;
+			break;
 				
-			case OF_KEY_UP:
-				angle++;
-				if(angle>30) angle=30;
-				kinect.setCameraTiltAngle(angle);
-				break;
+		case OF_KEY_UP:
+			angle++;
+			if(angle>30) angle=30;
+			kinect.setCameraTiltAngle(angle);
+			break;
 				
-			case OF_KEY_DOWN:
-				angle--;
-				if(angle<-30) angle=-30;
-				kinect.setCameraTiltAngle(angle);
-				break;
+		case OF_KEY_DOWN:
+			angle--;
+			if(angle<-30) angle=-30;
+			kinect.setCameraTiltAngle(angle);
+			break;
 				
-		default: //Check key character <<<<===== Remove this
-			//printf("%c",e.key);
+		default:
 			break;
 		}
 	}
 }
 
-void ofxKCoreVision::_keyReleased(ofKeyEventArgs &e)
-{
-	if (showConfiguration)
-	{
-		if ( e.key == 'c' && !bCalibration)
-		{
+void ofxKCoreVision::_keyReleased(ofKeyEventArgs &e){
+	if (showConfiguration){
+		if ( e.key == 'c' && !bCalibration){
 			bShowInterface = false;
 			// Enter/Exit Calibration
 			bCalibration = true;
@@ -837,24 +737,19 @@ void ofxKCoreVision::_keyReleased(ofKeyEventArgs &e)
 /*****************************************************************************
 *	MOUSE EVENTS
 *****************************************************************************/
-void ofxKCoreVision::_mouseDragged(ofMouseEventArgs &e)
-{
+void ofxKCoreVision::_mouseDragged(ofMouseEventArgs &e){
 	if (showConfiguration)
 		controls->mouseDragged(e.x, e.y, e.button); //guilistener
-	if(contourFinder.bTrackObjects)
-	{
-		if( e.x > 385 && e.x < 705 && e.y > 30 && e.y < 270 )
-		{
-			if( e.x < rect.x || e.y < rect.y )
-			{
+	
+	if(contourFinder.bTrackObjects){
+		if( e.x > 385 && e.x < 705 && e.y > 30 && e.y < 270 ){
+			if( e.x < rect.x || e.y < rect.y ){
 				rect.width = rect.x - e.x;
 				rect.height = rect.y - e.y;
 
 				rect.x = e.x;
 				rect.y =  e.y;
-			}
-			else
-			{
+			} else {
 				rect.width = e.x - rect.x;
 				rect.height = e.y - rect.y;
 			}
@@ -889,10 +784,9 @@ void ofxKCoreVision::_mouseReleased(ofMouseEventArgs &e)
 {
 	if (showConfiguration)
 		controls->mouseReleased(e.x, e.y, 0); //guilistener
-	if( e.x > 385 && e.x < 705 && e.y > 30 && e.y < 270 )
-	{
-		if	( contourFinder.bTrackObjects && isSelecting )
-		{
+	
+	if( e.x > 385 && e.x < 705 && e.y > 30 && e.y < 270 ){
+		if	( contourFinder.bTrackObjects && isSelecting ){
 			minRect = rect;
 			maxRect = rect;
 		}
@@ -903,13 +797,15 @@ void ofxKCoreVision::_mouseReleased(ofMouseEventArgs &e)
 * Getters
 *****************************************************************************/
 
-std::map<int, Blob> ofxKCoreVision::getBlobs()
-{
+std::map<int, Blob> ofxKCoreVision::getBlobs(){
 	return tracker.getTrackedBlobs();
 }
 
-std::map<int,Blob> ofxKCoreVision::getObjects()
-{
+std::map<int, Blob> ofxKCoreVision::getFingers(){
+	return tracker.getTrackedFingers();
+}
+
+std::map<int,Blob> ofxKCoreVision::getObjects(){
 	return tracker.getTrackedObjects();
 }
 
@@ -927,8 +823,6 @@ void ofxKCoreVision::_exit(ofEventArgs &e){
 	// AlexP
 	// C++ guarantees that operator delete checks its argument for null-ness
 	delete filter;		filter = NULL;
-	//delete vidGrabber;	vidGrabber = NULL;
-	//delete vidPlayer;	vidPlayer = NULL;
 	// -------------------------------- SAVE STATE ON EXIT
 	printf("Vision module has exited!\n");
 }

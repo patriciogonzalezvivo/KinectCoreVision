@@ -71,8 +71,8 @@ void ofxKCoreVision::setupControls()
 	oPanel->mObjWidth = 200;
 
 	ofxGuiPanel* trackingPanel = controls->addPanel(appPtr->optionPanel, "Track", 740, 440, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
+	trackingPanel->addButton(appPtr->trackingPanel_trackBlobs, "Blobs", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	trackingPanel->addButton(appPtr->trackingPanel_trackFingers, "Fingers", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
-	//trackingPanel->addButton(appPtr->trackingPanel_trackFiducials, "Fiducials", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	trackingPanel->addButton(appPtr->trackingPanel_trackObjects, "Objects", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	trackingPanel->mObjHeight = 90;
 	trackingPanel->mObjWidth = 200;
@@ -112,15 +112,13 @@ void ofxKCoreVision::setupControls()
 	ofxGuiPanel* srcPanel = controls->addPanel(appPtr->sourcePanel, "Source Image", 31, 255, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
 	srcPanel->addButton(appPtr->trackedPanel_outlines, "Show Outlines (o)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	srcPanel->addButton(appPtr->trackedPanel_ids, "Show IDs (i)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
-	//srcPanel->addButton(appPtr->sourcePanel_cam, "Use Camera", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
-	//srcPanel->addButton(appPtr->sourcePanel_previousCam, "Previous Camera", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Trigger);
-	//srcPanel->addButton(appPtr->sourcePanel_nextCam, "Next Camera", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Trigger);
+	srcPanel->addSlider(appPtr->trackedPanel_hullPress, "Finger Pressition", 140, 13, 0.0, 100.0, hullPress, kofxGui_Display_Float2, 0);
 	srcPanel->mObjWidth = 319;
 	srcPanel->mObjects[0]->mObjX = 110;
 	srcPanel->mObjects[0]->mObjY = 11;
 	srcPanel->mObjects[1]->mObjX = 230;
 	srcPanel->mObjects[1]->mObjY = 11;
-	//srcPanel->mObjects[2]->mObjY = 42;
+	srcPanel->mObjects[2]->mObjY = 32;
 	//srcPanel->mObjects[3]->mObjX = 110;
 	//srcPanel->mObjects[3]->mObjY = 42;
 	//srcPanel->mObjects[4]->mObjX = 230;
@@ -215,28 +213,26 @@ void ofxKCoreVision::setupControls()
 	controls->update(appPtr->trackedPanel_min_blob_size, kofxGui_Set_Bool, &appPtr->MIN_BLOB_SIZE, sizeof(float));
 	//Max Blob Size
 	controls->update(appPtr->trackedPanel_max_blob_size, kofxGui_Set_Bool, &appPtr->MAX_BLOB_SIZE, sizeof(float));
+	//Hull Convex Pressition
+	controls->update(appPtr->trackedPanel_hullPress, kofxGui_Set_Bool, &appPtr->hullPress, sizeof(float));
 	//Template Area
 	controls->update(appPtr->TemplatePanel_minArea, kofxGui_Set_Bool, &appPtr->minTempArea, sizeof(float));
 	controls->update(appPtr->TemplatePanel_maxArea, kofxGui_Set_Bool, &appPtr->maxTempArea, sizeof(float));
-	/*
-	controls->update(appPtr->TemplatePanel_minArea, kofxGui_Set_Bool, &appPtr->minTempArea, sizeof(float));
-	controls->update(appPtr->TemplatePanel_maxArea, kofxGui_Set_Bool, &appPtr->maxTempArea, sizeof(float));*/
 	//Background Learn Rate
 	controls->update(appPtr->backgroundPanel_learn_rate, kofxGui_Set_Bool, &appPtr->backgroundLearnRate, sizeof(float));
 	//Track Panel
+	controls->update(appPtr->trackingPanel_trackBlobs, kofxGui_Set_Bool, &appPtr->contourFinder.bTrackBlobs, sizeof(bool));
 	controls->update(appPtr->trackingPanel_trackFingers, kofxGui_Set_Bool, &appPtr->contourFinder.bTrackFingers, sizeof(bool));
 	controls->update(appPtr->trackingPanel_trackObjects, kofxGui_Set_Bool, &appPtr->contourFinder.bTrackObjects, sizeof(bool));
-	//controls->update(appPtr->trackingPanel_trackFiducials, kofxGui_Set_Bool, &appPtr->contourFinder.bTrackFiducials, sizeof(bool));
 	//Send TUIO
 	controls->update(appPtr->optionPanel_tuio_osc, kofxGui_Set_Bool, &appPtr->myTUIO.bOSCMode, sizeof(bool));
 	controls->update(appPtr->optionPanel_tuio_tcp, kofxGui_Set_Bool, &appPtr->myTUIO.bTCPMode, sizeof(bool));
 	controls->update(appPtr->optionPanel_bin_tcp, kofxGui_Set_Bool, &appPtr->myTUIO.bBinaryMode, sizeof(bool));
 	//TUIO Height Width
-//	controls->update(appPtr->optionPanel_tuio_height_width, kofxGui_Set_Bool, &appPtr->myTUIO.bHeightWidth, sizeof(bool));
+	//controls->update(appPtr->optionPanel_tuio_height_width, kofxGui_Set_Bool, &appPtr->myTUIO.bHeightWidth, sizeof(bool));
 }
 
-void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int length)
-{
+void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int length){
 	switch(parameterId){
 		//Calibration
 		case calibrationPanel_calibrate:
@@ -261,6 +257,10 @@ void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 			break;
 
 		//Tracking Panel
+		case trackingPanel_trackBlobs:
+			if(length == sizeof(bool))
+				contourFinder.bTrackBlobs=*(bool*)data;
+			break;
 		case trackingPanel_trackFingers:
 			if(length == sizeof(bool))
 				contourFinder.bTrackFingers=*(bool*)data;
@@ -279,11 +279,6 @@ void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 				}
 			}
 			break;
-		/*case trackingPanel_trackFiducials:
-			if(length == sizeof(bool)){
-				contourFinder.bTrackFiducials=*(bool*)data;
-			}
-			break;*/
 		//Communication
 		case optionPanel_tuio_osc:
 			if(length == sizeof(bool))
@@ -343,74 +338,32 @@ void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 		//Highpass
 		case highpassPanel_use:
 			if(length == sizeof(bool))
-			{
-				//if(!bFidMode){
-					filter->bHighpass = *(bool*)data;
-				//} else {
-				//	filter_fiducial->bHighpass = *(bool*)data;
-				//}
-			}
+				filter->bHighpass = *(bool*)data;
 			break;
 		case highpassPanel_blur:
 			if(length == sizeof(float))
-			{
-				//if(!bFidMode){
-					filter->highpassBlur = *(float*)data;
-				//} else {
-				//	filter_fiducial->highpassBlur = *(float*)data;
-				//}
-			}
+				filter->highpassBlur = *(float*)data;
 			break;
 		case highpassPanel_noise:
 			if(length == sizeof(float))
-			{
-				//if(!bFidMode){
-					filter->highpassNoise = *(float*)data;
-				//}else{
-				//	filter_fiducial->highpassNoise = *(float*)data;
-				//}
-			}
+				filter->highpassNoise = *(float*)data;
 			break;
 		//Amplify
 		case amplifyPanel_use:
 			if(length == sizeof(bool))
-			{
-				//if(!bFidMode){
-					filter->bAmplify = *(bool*)data;
-				//}else{
-				//	filter_fiducial->bAmplify = *(bool*)data;
-				//}
-			}
+				filter->bAmplify = *(bool*)data;
 			break;
 		case amplifyPanel_amp:
 			if(length == sizeof(float))
-			{
-				//if(!bFidMode){
-					filter->highpassAmp = *(float*)data;
-				//}else{
-				//	filter_fiducial->highpassAmp = *(float*)data;
-				//}
-			}
+				filter->highpassAmp = *(float*)data;
 			break;
 		case trackedPanel_darkblobs:
 			if(length == sizeof(bool))
-			{
-				//if(!bFidMode){
-				//	filter->bTrackDark = *(bool*)data;
-				//}else{
-				//	filter_fiducial->bTrackDark = *(bool*)data;
-				//}
-			}
+				filter->bTrackDark = *(bool*)data;
 			break;
 		case trackedPanel_threshold:
 			if(length == sizeof(float))
-			{
-				//if(!bFidMode){
-					filter->threshold = *(float*)data;
-				//}else{
-				//	filter_fiducial->threshold = *(float*)data;
-				//}
-			}
+				filter->threshold = *(float*)data;
 			break;
 		case trackedPanel_min_movement:
 			if(length == sizeof(float))
@@ -435,23 +388,11 @@ void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 		//smooth
 		case smoothPanel_smooth:
 			if(length == sizeof(float))
-			{
-				//if(!bFidMode){
-					filter->smooth = *(float*)data;
-				//}else{
-				//	filter_fiducial->smooth = *(float*)data;
-				//}
-			}
+				filter->smooth = *(float*)data;
 			break;
 		case smoothPanel_use:
 			if(length == sizeof(bool))
-			{
-				//if(!bFidMode){
-					filter->bSmooth = *(bool*)data;
-				//}else{
-				//	filter_fiducial->bSmooth = *(bool*)data;
-				//}
-			}
+				filter->bSmooth = *(bool*)data;
 			break;
 		//Template Area Sliders
 		case TemplatePanel_minArea:
@@ -497,26 +438,15 @@ void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 			break;
 		case kParameter_LoadTemplateXml:
 			if(length == sizeof(bool))
-			{
 				if(*(bool*)data)
-				{
 					if(templates.loadTemplateXml())
-					{
 						printf("Templates Loaded\n");
-					}
-				}
-			}
 			break;
 		case kParameter_SaveTemplateXml:
 			if(length == sizeof(bool))
-			{
 				if(*(bool*)data)
-				{
 					templates.saveTemplateXml();
-				}
-			}
 			break;
-
 	}
 }
 #endif //GUI_CONTROLS_H

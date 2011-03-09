@@ -56,11 +56,10 @@ class Blob {
         }
 
         //----------------------------------------
-        void drawContours(float x = 0, float y = 0, float inputWidth = ofGetWidth(), float inputHeight = ofGetHeight(), float outputWidth = ofGetWidth(), float outputHeight = ofGetHeight()) 
-		{
+        void drawContours(float x = 0, float y = 0, float inputWidth = ofGetWidth(), float inputHeight = ofGetHeight(), float outputWidth = ofGetWidth(), float outputHeight = ofGetHeight()) {
             glPushMatrix();
                 glTranslatef(x + angleBoundingRect.x/inputWidth * outputWidth, y + angleBoundingRect.y/inputHeight * outputHeight, 0.0f);
-                glRotatef(angle, 0.0f, 0.0f, 1.0f);
+                glRotatef(angle+90, 0.0f, 0.0f, 1.0f);
                 glTranslatef(-(x + angleBoundingRect.x/inputWidth * outputWidth), -(y + angleBoundingRect.y/inputHeight * outputHeight), 0.0f);                
 				
 					//ofSetColor(0xFFFFFF);
@@ -68,8 +67,8 @@ class Blob {
 					
 					ofSetColor(0,153,255);
 			
-					ofRect(x + (angleBoundingRect.x/inputWidth) * outputWidth, y + ((angleBoundingRect.y - angleBoundingRect.height)/inputHeight) * outputHeight, 1, (angleBoundingRect.height * 2)/inputHeight * outputHeight); //Vertical Plus
-					ofRect(x + ((angleBoundingRect.x - angleBoundingRect.width)/inputWidth) * outputWidth, y + (angleBoundingRect.y/inputHeight) * outputHeight, (angleBoundingRect.width * 2)/inputWidth * outputWidth, 1); //Horizontal Plus
+					ofRect(x + (angleBoundingRect.x/inputWidth) * outputWidth, y + ((angleBoundingRect.y - angleBoundingRect.height/2)/inputHeight) * outputHeight, 1, (angleBoundingRect.height)/inputHeight * outputHeight); //Vertical Plus
+					ofRect(x + ((angleBoundingRect.x - angleBoundingRect.width/2)/inputWidth) * outputWidth, y + (angleBoundingRect.y/inputHeight) * outputHeight, (angleBoundingRect.width)/inputWidth * outputWidth, 1); //Horizontal Plus
 
             glPopMatrix();
 
@@ -81,19 +80,42 @@ class Blob {
                    ofVertex(x + pts[i].x/inputWidth * outputWidth, y + pts[i].y/(inputHeight) * outputHeight);
             ofEndShape(true);	
         }
+	
+		void drawCenter(float x = 0, float y = 0, float inputWidth = ofGetWidth(), float inputHeight = ofGetHeight(), float outputWidth = ofGetWidth(), float outputHeight = ofGetHeight()) {
+			ofSetColor(255,0,0);
+			ofFill();
+			
+			ofCircle(x + (centroid.x - 2.5)/inputWidth * outputWidth, y + (centroid.y - 2.5)/inputHeight * outputHeight, 5);
+			//ofRect(0, - 2.5 /inputHeight * outputHeight, 1 , 5); //Vertical Plus
+			//ofRect(- 2.5 /inputHeight * outputHeight, 0, 5 , 1); //Horizontal Plus
+			
+			ofPushMatrix();
+			ofSetColor(0);
+			ofTranslate(x + boundingRect.x/inputWidth * outputWidth, y + boundingRect.y/inputHeight * outputHeight, 0.0f);
+			ofRotate(ofRadToDeg(-angle), 0.0f, 0.0f, 1.0f);
+			ofTranslate(-(x + boundingRect.x/inputWidth * outputWidth), -(y + boundingRect.y/inputHeight * outputHeight), 0.0f);                
+			
+			//glTranslatef(x + centroid.x/inputWidth * outputWidth , y + centroid.y/inputHeight * outputHeight , 0.0f);
+			//glRotatef(angle, 0.0f, 0.0f, 1.0f);
+		
+			ofRect(x + (boundingRect.x/inputWidth) * outputWidth, y + ((boundingRect.y - boundingRect.height)/inputHeight) * outputHeight, 1, (boundingRect.height * 2)/inputHeight * outputHeight); //Vertical Plus
+			ofRect(x + ((boundingRect.x - boundingRect.width)/inputWidth) * outputWidth, y + (boundingRect.y/inputHeight) * outputHeight, (boundingRect.width * 2)/inputWidth * outputWidth, 1); //Horizontal Plus
+			
+			ofPopMatrix();	
+		}
+	
 
-		void drawBox(float x = 0, float y = 0, float inputWidth = ofGetWidth(), float inputHeight = ofGetHeight(), float outputWidth = ofGetWidth(), float outputHeight = ofGetHeight())
-		{		
-         glPushMatrix();
-         glTranslatef(x + angleBoundingRect.x/inputWidth * outputWidth, y + angleBoundingRect.y/inputHeight * outputHeight, 0.0f);
-         glRotatef(-angle, 0.0f, 0.0f, 1.0f);
-         glTranslatef(-(x + angleBoundingRect.x/inputWidth * outputWidth), -(y + angleBoundingRect.y/inputHeight * outputHeight), 0.0f);                
-		 ofNoFill();
+		void drawBox(float x = 0, float y = 0, float inputWidth = ofGetWidth(), float inputHeight = ofGetHeight(), float outputWidth = ofGetWidth(), float outputHeight = ofGetHeight()){		
+			glPushMatrix();
+			glTranslatef(x + angleBoundingRect.x/inputWidth * outputWidth, y + angleBoundingRect.y/inputHeight * outputHeight, 0.0f);
+			glRotatef(-angle, 0.0f, 0.0f, 1.0f);
+			glTranslatef(-(x + angleBoundingRect.x/inputWidth * outputWidth), -(y + angleBoundingRect.y/inputHeight * outputHeight), 0.0f);                
+			ofNoFill();
 		 
-		 ofSetColor(255);
-		 ofRect(x + (angleBoundingRect.x - angleBoundingRect.width/2)/inputWidth * outputWidth, y + (angleBoundingRect.y - angleBoundingRect.height/2)/inputHeight * outputHeight, angleBoundingRect.width/inputWidth * outputWidth, angleBoundingRect.height/inputHeight * outputHeight);
+			ofSetColor(255);
+			ofRect(x + (angleBoundingRect.x - angleBoundingRect.width/2)/inputWidth * outputWidth, y + (angleBoundingRect.y - angleBoundingRect.height/2)/inputHeight * outputHeight, angleBoundingRect.width/inputWidth * outputWidth, angleBoundingRect.height/inputHeight * outputHeight);
 
-		 glPopMatrix();
+			glPopMatrix();
 		}
 };
 #endif

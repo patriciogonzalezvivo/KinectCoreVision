@@ -21,32 +21,34 @@
 #define TOUCH_MAX_CONTOURS			128
 #define TOUCH_MAX_CONTOUR_LENGTH	1024
 
-class ContourFinder 
-{
-  public:
+class ContourFinder {
+public:
 
     ContourFinder();
     ~ContourFinder();
 	
 	void setTemplateUtils(TemplateUtils * _templates);
-	int findContours( ofxCvGrayscaleImage& input,
-                       int minArea, int maxArea,
-                       int nConsidered, bool bFindHoles,
-                       bool bUseApproximation = true);
+	
+	int findContours(	ofxCvGrayscaleImage& input,
+						int minArea,	int maxArea,
+						int nConsidered,	double hullPress,
+						bool bFindHoles,	bool bUseApproximation = true);
                        // approximation = don't do points for all points of the contour, if the contour runs
                        // along a straight line, for example...
-		
-    int					nBlobs;     // how many did we find
-	int					nObjects;	
+	
+    int				nBlobs;     // how many did we find
+	int				nFingers;
+	int				nObjects;	
 
-    vector <Blob>		blobs;      // the blobs, in a std::vector...
-	vector <Blob>		objects;
+    vector <Blob>	blobs;      // the blobs, in a std::vector...
+	vector <Blob>	fingers;
+	vector <Blob>	objects;
 
+	bool bTrackBlobs;
 	bool bTrackFingers;
 	bool bTrackObjects;
-	//bool bTrackFiducials;
 
-  protected:
+protected:
 
     // this is stuff, not for general public to touch -- we need
     // this to do the blob detection, etc.
@@ -63,9 +65,5 @@ class ContourFinder
 
     // imporant!!
     void                reset();
-
 };
-
-
-
 #endif

@@ -28,38 +28,32 @@
 #include "ofxKCore.h"
 
 // height and width of the source/tracked draw window
-#define MAIN_WINDOW_HEIGHT 240.0f
 #define MAIN_WINDOW_WIDTH  320.0f
+#define MAIN_WINDOW_HEIGHT 240.0f
 
-class ofxKCoreVision : public ofxGuiListener
-{
-	// ofxGUI setup stuff
-	enum
-	{
+class ofxKCoreVision : public ofxGuiListener{  // ofxGUI setup stuff
+enum {
 		propertiesPanel,
 		propertiesPanel_flipV,
 		propertiesPanel_flipH,
-		//propertiesPanel_settings,
 		propertiesPanel_pressure,
 
 		optionPanel,
 		optionPanel_tuio_osc,
 		optionPanel_tuio_tcp,
 		optionPanel_bin_tcp,
+		optionPanel_tuio_height_width,
 
 		calibrationPanel,
 		calibrationPanel_calibrate,
 		calibrationPanel_warp,
 
 		sourcePanel,
-		//sourcePanel_cam,
-		//sourcePanel_nextCam,
-		//sourcePanel_previousCam,
 		
 		TemplatePanel,
 		TemplatePanel_minArea,
 		TemplatePanel_maxArea,
-
+		
 		backgroundPanel,
 		backgroundPanel_remove,
 		backgroundPanel_dynamic,
@@ -87,11 +81,12 @@ class ofxKCoreVision : public ofxGuiListener
 		trackedPanel_max_blob_size,
 		trackedPanel_outlines,
 		trackedPanel_ids,
+		trackedPanel_hullPress,
 
 		trackingPanel, //Panel for selecting what to track-Fingers, Objects or Fiducials
+		trackingPanel_trackBlobs,
 		trackingPanel_trackFingers,
 		trackingPanel_trackObjects,
-		trackingPanel_trackFiducials,
 
 		savePanel,
 		kParameter_SaveXml,
@@ -117,12 +112,13 @@ public:
 		
 		//initialize filter
 		filter = NULL;
-		//filter_fiducial = NULL;
+		
 		//fps and dsp calculation
 		frames		= 0;
 		fps			= 0;
 		lastFPSlog	= 0;
 		differenceTime = 0;
+		
 		//bools
 		bCalibration= 0;
 		bFullscreen = 0;
@@ -131,21 +127,23 @@ public:
 		bDrawOutlines = 1;
 		bGPUMode = 0;
 		bTUIOMode = 0;
-		//bFidMode = 0;
 		
 		showConfiguration = 0;
-		//camera
+		
+		//Kinect Camera
 		camRate = 30;
 		camWidth = 320*2;
 		camHeight = 240*2;
+		
 		//ints/floats
 		backgroundLearnRate = .01;
 		MIN_BLOB_SIZE = 2;
 		MAX_BLOB_SIZE = 100;
+		hullPress = 20;
 
+		contourFinder.bTrackBlobs=false;
 		contourFinder.bTrackFingers=false;
 		contourFinder.bTrackObjects=false;
-		//contourFinder.bTrackFiducials=false;
 
         //if auto tracker is defined then the tracker automagically comes up
         //on startup..
@@ -156,12 +154,10 @@ public:
         #endif
 	}
 
-	~ofxKCoreVision()
-	{
+	~ofxKCoreVision(){
 		// AlexP
 		// C++ guarantees that operator delete checks its argument for null-ness
 		delete filter;		filter = NULL;
-		//delete filter_fiducial;		filter_fiducial = NULL;
 		kinect.close();
 	}
 
@@ -183,7 +179,7 @@ public:
 
 	//GUI
 	void setupControls();
-	void		handleGui(int parameterId, int task, void* data, int length);
+	void handleGui(int parameterId, int task, void* data, int length);
 	ofxGui*		controls;
 
 	//image processing stuff
@@ -197,20 +193,18 @@ public:
 	void drawMiniMode();
 	void drawFullMode();
 
-	//void drawFiducials();
-
 	//Load/save settings
 	void loadXMLSettings();
 	void saveSettings();
 
 	//Getters
 	std::map<int, Blob> getBlobs();
+	std::map<int, Blob> getFingers();
 	std::map<int, Blob> getObjects();
 
 	/***************************************************************
 	 *					Kinect Capture Device
 	 ***************************************************************/
-	
 	ofxKinect kinect;
 	
 	ofxCvGrayscaleImage 	grayImage;
@@ -224,7 +218,6 @@ public:
 	/****************************************************************
 	 *            Variables in config.xml Settings file
 	 *****************************************************************/
-    //int					deviceID;
 	int 				frameseq;
 	int 				threshold;
 	int					wobbleThreshold;
@@ -255,22 +248,10 @@ public:
 	//Area slider variables
 	int					minTempArea;
 	int					maxTempArea;
-
-	//For the fiducial mode drawing
-	//bool				bFidMode;
-	//auto ~ standalone/non-addon
+	float				hullPress;
+	
 	bool                bStandaloneMode;
-	/*****************************************************
-	*		Fiducial Finder
-	*******************************************************/
-	//ofxFiducialTracker	fidfinder;
-
-	//float				fiducialDrawFactor_Width; //To draw the Fiducials in the right place we have to scale from camWidth to filter->camWidth
-    //float				fiducialDrawFactor_Height;
-
-	//Filters*			filter_fiducial;
-	//CPUImageFilter		processedImg_fiducial;
-
+	
 	/****************************************************
 	 *End config.xml variables
 	 *****************************************************/
@@ -311,8 +292,6 @@ public:
 	bool				isSelecting;
 
 	//Area sliders
-
-
     /****************************************************************
 	 *						Private Stuff
 	 ****************************************************************/
