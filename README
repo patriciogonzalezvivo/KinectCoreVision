@@ -1,12 +1,5 @@
-First off all. I´m using last version of openFrameworks witch is quite inestable for the moment. So all this project it could be consider like "very experimental". With some time, patients and collaboration it´s going to work properly.
-
-So let´s get started:
+I´m using oF 007 version
 
 1- Download and install last GitHub openFramework version  
-2- Download and put ofxKinect addon inside ...openFramework/addons directory 
-3- Donwload KinectCoreVision source code and put it inside one directory under ...openFrameworks/apps folder.
-4- Open the xcode project and check that the addons dependences are ok. May be you need to add a search path to: ../../../addons/ofxKinect/libs/libusb/osx/libs under Targets->YourApp->Build->Library Search Paths (make sure All Configurations and All Settings are selected). 
-
-Note: I have to add the search path to opencv/libs/osx/include path to.
-
-More and detail information at http://http://www.patriciogonzalezvivo.com/blog/?cat=118
+2- Download and install ofxOpenNI from github.com/gameoverhack/ofxOpenNI
+3- Compile :) 
