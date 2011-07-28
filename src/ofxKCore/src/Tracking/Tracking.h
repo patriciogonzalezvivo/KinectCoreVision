@@ -35,10 +35,9 @@ public:
 	std::map<int, Blob> getTrackedObjects();
 
 private:
-	//int trackKnn(ContourFinder *newBlobs, Blob *track, int k, double thresh);
 	int trackKnn(ContourFinder *newBlobs, Blob *track, int k, double thresh, bool fingers);
-	int						IDCounter;	  //counter of last blob
-	int						fightMongrel;
+	int	IDCounter;	  //counter of last blob
+	int	fightMongrel;
 	
 	std::vector<Blob>		trackedBlobs; //tracked blobs
 	std::map<int, Blob>     calibratedBlobs;

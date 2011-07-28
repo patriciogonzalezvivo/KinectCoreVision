@@ -249,7 +249,7 @@ int ContourFinder::findContours(	ofxCvGrayscaleImage&  input,
 					float angle = acos( (v1.x*v2.x + v1.y*v2.y) / (norm(v1) * norm(v2)) );
 						
 					// low interior angle + within upper 90% of region -> we got a finger
-					if (angle < 1 && PointArray[idx].y < cutoff) {
+					if (angle < 1 ){ //&& PointArray[idx].y < cutoff) {
 						Blob blob = Blob();
 						
 						//float area = cvContourArea( contour_ptr, CV_WHOLE_SEQ );

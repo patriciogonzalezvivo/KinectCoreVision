@@ -91,8 +91,7 @@
 //GUI
 #include "Controls/ofxGui.h"
 #include "Controls/ofxGuiTypes.h"
-
-#include "ofxKinect.h"
+#include "ofxOpenNI.h"
 #include "ofxKCoreVision.h"
 
 #endif

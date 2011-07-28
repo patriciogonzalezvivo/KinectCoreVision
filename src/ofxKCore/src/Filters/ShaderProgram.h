@@ -12,7 +12,7 @@
 
 #ifdef __APPLE_CC__
 	//#include "GLee.h"
-	#include "glew.h"
+	#include "GL/glew.h"
 	#include <OpenGL/gl.h>
 	#include <GLUT/glut.h>
 #else

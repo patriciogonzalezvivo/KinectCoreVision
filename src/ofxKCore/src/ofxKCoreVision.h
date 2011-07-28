@@ -16,13 +16,13 @@
 //Addons
 
 #include "ofxOpenCv.h"
-#include "ofxDirList.h"
+//#include "ofxDirList.h"
 #include "ofxNetwork.h"
 #include "ofxOsc.h"
 #include "ofxXmlSettings.h"
 
-// Kinect Addon
-#include "ofxKinect.h"
+// OpenNI Addon
+#include "ofxOpenNI.h"
 
 // Our Addon
 #include "ofxKCore.h"
@@ -158,7 +158,7 @@ public:
 		// AlexP
 		// C++ guarantees that operator delete checks its argument for null-ness
 		delete filter;		filter = NULL;
-		kinect.close();
+		//kinect.close()
 	}
 
 	/****************************************************************
@@ -184,7 +184,7 @@ public:
 
 	//image processing stuff
 	void initDevice();
-	//void getPixels();
+	void getPixels();
 	void grabFrameToCPU();
 	void grabFrameToGPU(GLuint target);
 
@@ -205,15 +205,12 @@ public:
 	/***************************************************************
 	 *					Kinect Capture Device
 	 ***************************************************************/
-	ofxKinect kinect;
+	ofxOpenNIContext	context;
+	ofxDepthGenerator	depth;
 	
-	ofxCvGrayscaleImage 	grayImage;
-	ofxCvGrayscaleImage 	grayThresh;
-	ofxCvGrayscaleImage 	grayThreshFar;
-	
-	int						nearThreshold;
-	int						farThreshold;
-	int						angle;
+	int					nearThreshold;
+	int					farThreshold;
+	int					angle;
 
 	/****************************************************************
 	 *            Variables in config.xml Settings file

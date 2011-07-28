@@ -23,8 +23,8 @@ class Filters {
 
 	  Filters(){
 
-		camWidth = 320;
-		camHeight = 240;
+		camWidth = 320*2;
+		camHeight = 240*2;
 		exposureStartTime = CAMERA_EXPOSURE_TIME;
 
 		//filter values

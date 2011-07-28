@@ -15,6 +15,7 @@
 //	----------------------------------------------------------------------------------------------------
 
 #include "ofxGuiTypes.h"
+#include "ofxXmlSettings.h"
 
 //	----------------------------------------------------------------------------------------------------
 
@@ -36,7 +37,7 @@ public:
 	ofTrueTypeFont	mParamFont;
 	
 	ofxXmlSettings	mXml;
-	ofxDirList		mDir;
+	ofDirectory		mDir;
 
 	string			mXmlfile;
 	

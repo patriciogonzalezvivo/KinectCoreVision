@@ -19,7 +19,7 @@
 #define OF_ADDON_USING_OFXXMLSETTINGS
 
 #include "ofMain.h"
-#include "ofAddons.h"
+//#include "ofAddons.h"
 
 //	----------------------------------------------------------------------------------------------------
 

@@ -54,7 +54,6 @@ void ofxKCoreVision::setupControls()
 	controls->mGlobals->mSliderColor.a = .8;
 
 	ofxGuiPanel* propPanel = controls->addPanel(appPtr->propertiesPanel, "Camera Properties", 740, 150, 12, OFXGUI_PANEL_SPACING);
-	//propPanel->addButton(appPtr->propertiesPanel_settings, "Camera Settings (v)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Trigger);
 	propPanel->addButton(appPtr->propertiesPanel_flipV, "Flip Vertical (j)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	propPanel->addButton(appPtr->propertiesPanel_flipH, "Flip Horizontal (h)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	propPanel->mObjWidth = 200;
@@ -65,8 +64,6 @@ void ofxKCoreVision::setupControls()
 	oPanel->addButton(appPtr->optionPanel_tuio_osc, "TUIO UDP (t)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	oPanel->addButton(appPtr->optionPanel_tuio_tcp, "Flash XML (f)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	oPanel->addButton(appPtr->optionPanel_bin_tcp, "Binary TCP (n)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
-	//oPanel->addButton(appPtr->optionPanel_tuio_height_width, "Send TUIO LC", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
-	//oPanel->addButton(appPtr->optionPanel_tuio_height_width, "Send Height & Width ", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	oPanel->mObjHeight = 90;
 	oPanel->mObjWidth = 200;
 
@@ -112,13 +109,14 @@ void ofxKCoreVision::setupControls()
 	ofxGuiPanel* srcPanel = controls->addPanel(appPtr->sourcePanel, "Source Image", 31, 255, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
 	srcPanel->addButton(appPtr->trackedPanel_outlines, "Show Outlines (o)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	srcPanel->addButton(appPtr->trackedPanel_ids, "Show IDs (i)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
-	srcPanel->addSlider(appPtr->trackedPanel_hullPress, "Finger Pressition", 140, 13, 0.0, 100.0, hullPress, kofxGui_Display_Float2, 0);
+	//srcPanel->addSlider(appPtr->trackedPanel_hullPress, "Finger Pressition", 140, 13, 0.0, 100.0, hullPress, kofxGui_Display_Float2, 0);
 	srcPanel->mObjWidth = 319;
 	srcPanel->mObjects[0]->mObjX = 110;
 	srcPanel->mObjects[0]->mObjY = 11;
 	srcPanel->mObjects[1]->mObjX = 230;
 	srcPanel->mObjects[1]->mObjY = 11;
-	srcPanel->mObjects[2]->mObjY = 32;
+	//srcPanel->mObjects[2]->mObjX = 230; //
+	//srcPanel->mObjects[2]->mObjY = 32; //
 	//srcPanel->mObjects[3]->mObjX = 110;
 	//srcPanel->mObjects[3]->mObjY = 42;
 	//srcPanel->mObjects[4]->mObjX = 230;
@@ -128,10 +126,8 @@ void ofxKCoreVision::setupControls()
 
 	//Distance (ex template)
 	ofxGuiPanel* tPanel = controls->addPanel(appPtr->TemplatePanel, "Distance between:", 31, 315, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
-	/*tPanel->addSlider(appPtr->TemplatePanel_minArea, "Min Area", 140, 13, 0.0f, 2000.0f, minTempArea, kofxGui_Display_Int, 0);
-	tPanel->addSlider(appPtr->TemplatePanel_maxArea, "Max Area", 140, 13, 0.0f, 2000.0f, maxTempArea, kofxGui_Display_Int, 0);*/
-	tPanel->addSlider(appPtr->TemplatePanel_minArea, "Near", 140, 13, 0.0f, 255.0f, nearThreshold, kofxGui_Display_Int, 0);
-	tPanel->addSlider(appPtr->TemplatePanel_maxArea, "Far", 140, 13, 0.0f, 255.0f, farThreshold, kofxGui_Display_Int, 0);
+	tPanel->addSlider(appPtr->TemplatePanel_minArea, "Near mm", 140, 13, 0, 4000, nearThreshold, kofxGui_Display_Int, 0);
+	tPanel->addSlider(appPtr->TemplatePanel_maxArea, "Far mm", 140, 13, 0, 4000, farThreshold, kofxGui_Display_Int, 0);
 	tPanel->mObjWidth = 319;
 	tPanel->mObjHeight = 60;
 	tPanel->mObjects[0]->mObjY = 25;
@@ -214,7 +210,7 @@ void ofxKCoreVision::setupControls()
 	//Max Blob Size
 	controls->update(appPtr->trackedPanel_max_blob_size, kofxGui_Set_Bool, &appPtr->MAX_BLOB_SIZE, sizeof(float));
 	//Hull Convex Pressition
-	controls->update(appPtr->trackedPanel_hullPress, kofxGui_Set_Bool, &appPtr->hullPress, sizeof(float));
+	//controls->update(appPtr->trackedPanel_hullPress, kofxGui_Set_Bool, &appPtr->hullPress, sizeof(float));
 	//Template Area
 	controls->update(appPtr->TemplatePanel_minArea, kofxGui_Set_Bool, &appPtr->minTempArea, sizeof(float));
 	controls->update(appPtr->TemplatePanel_maxArea, kofxGui_Set_Bool, &appPtr->maxTempArea, sizeof(float));
@@ -394,36 +390,12 @@ void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 			if(length == sizeof(bool))
 				filter->bSmooth = *(bool*)data;
 			break;
-		//Template Area Sliders
+		//Template Range Sliders
 		case TemplatePanel_minArea:
 			nearThreshold = *(float*)data;
-			/*
-			if(length == sizeof(float)){
-				minTempArea = *(float*)data;
-				float smallArea = rect.height*rect.width-minTempArea; //The area of the small rectangle
-				float _w = sqrt(smallArea*rect.width/rect.height); // Width of small rectangle, as the width and height
-																   //will be proportional to the original rectangle
-				float _h = sqrt(smallArea*rect.height/rect.width);
-				minRect.x =rect.x + (rect.width - _w)/2 ;
-				minRect.y = rect.y + (rect.height - _h)/2 ;
-				minRect.width = _w ;
-				minRect.height = _h ;
-			}*/
 			break;
 		case TemplatePanel_maxArea:
 			farThreshold = *(float*)data;
-			/*if(length == sizeof(float))
-			{
-				maxTempArea = *(float*)data;
-				float bigArea = rect.height*rect.width+maxTempArea; //The area of the big rectangle
-				float _w = sqrt(bigArea*rect.width/rect.height); // Width of big rectangle, as the width and height
-																 //will be proportional to the original rectangle
-				float _h = sqrt(bigArea*rect.height/rect.width);
-				maxRect.x =rect.x - (_w - rect.width)/2 ;
-				maxRect.y = rect.y - (_h - rect.height)/2 ;
-				maxRect.width = _w ;
-				maxRect.height = _h ;
-			}*/
 			break;
 		//Save Settings
 		case kParameter_SaveXml:

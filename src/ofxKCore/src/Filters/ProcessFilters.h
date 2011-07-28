@@ -194,7 +194,7 @@ class ProcessFilters : public Filters {
  *	Draw Filter Images
  ****************************************************************/
     void draw(){
-        //grayImg.draw(30, 15, 320, 240);
+        grayImg.draw(30, 15, 320, 240);
         grayDiff.draw(375, 15, 320, 240);
         floatBgImg.draw(30, 392, 128, 96);
         subtractBg.draw(165, 392, 128, 96);

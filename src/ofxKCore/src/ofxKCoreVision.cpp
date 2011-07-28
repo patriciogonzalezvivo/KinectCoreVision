@@ -15,16 +15,12 @@
 * The setup function is run once to perform initializations in the application
 *****************************************************************************/
 void ofxKCoreVision::_setup(ofEventArgs &e){
-	grayImage.allocate(kinect.width, kinect.height);
-	sourceImg.allocate(kinect.width, kinect.height);
-	grayThresh.allocate(kinect.width, kinect.height);
-	grayThreshFar.allocate(kinect.width, kinect.height);
-	
-	nearThreshold = 50;
-	farThreshold  = 180;
+	threshold = 80;
+	nearThreshold = 550;
+	farThreshold  = 650;
 	
 	//set the title
-	ofSetWindowTitle("Kinect Vision based on CCV v 1.4");
+	ofSetWindowTitle("Kinect Vision based on CCV v2");
 
 	//create filter
 	if(filter == NULL)	
@@ -149,8 +145,8 @@ void ofxKCoreVision::loadXMLSettings()
 	filter->bVerticalMirror		= XML.getValue("CONFIG:BOOLEAN:VMIRROR",0);
 	filter->bHorizontalMirror	= XML.getValue("CONFIG:BOOLEAN:HMIRROR",0);
 	
-	nearThreshold				= XML.getValue("CONFIG:KINECT:NEAR",0);
-	farThreshold				= XML.getValue("CONFIG:KINECT:FAR",100);
+	nearThreshold				= XML.getValue("CONFIG:KINECT:NEAR",500);
+	farThreshold				= XML.getValue("CONFIG:KINECT:FAR",800);
 	angle						= XML.getValue("CONFIG:KINECT:ANGLE",0);
 	
 	//Filters
@@ -167,6 +163,7 @@ void ofxKCoreVision::loadXMLSettings()
 	MIN_BLOB_SIZE				= XML.getValue("CONFIG:INT:MINBLOBSIZE",2);
 	MAX_BLOB_SIZE				= XML.getValue("CONFIG:INT:MAXBLOBSIZE",100);
 	backgroundLearnRate			= XML.getValue("CONFIG:INT:BGLEARNRATE", 0.01f);
+	
 	//Filter Settings
 	filter->threshold			= XML.getValue("CONFIG:INT:THRESHOLD",0);
 	filter->highpassBlur		= XML.getValue("CONFIG:INT:HIGHPASSBLUR",0);
@@ -245,14 +242,12 @@ void ofxKCoreVision::initDevice(){
 	//save/update log file
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
 	
-	kinect.init();
-	kinect.setVerbose(true);
-	kinect.open();
-	kinect.enableDepthNearValueWhite(false);
+	context.setup();
+	depth.setup(&context);
 	
 	cameraInited	=	true;
-	camWidth		=	kinect.width;
-	camHeight		=	kinect.height;
+	camWidth		=	depth.getWidth();
+	camHeight		=	depth.getHeight();
 }
 
 /******************************************************************************
@@ -261,8 +256,11 @@ void ofxKCoreVision::initDevice(){
 void ofxKCoreVision::_update(ofEventArgs &e){
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
 	
-	kinect.update();
-	bNewFrame = kinect.isFrameNew();
+	context.update();
+	depth.update();
+	
+	//bNewFrame = kinect.isFrameNew();
+	bNewFrame = true;	// TODO: look how to this in the correct way; 
 	
 	if(!bNewFrame){
 		return;			//if no new frame, return
@@ -316,41 +314,46 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 /************************************************
 *				Input Device Stuff
 ************************************************/
+void ofxKCoreVision::getPixels(){
+	
+	xn::DepthGenerator	depth_generator;
+	xn::DepthMetaData	dmd;
+	
+	depth_generator = depth.getXnDepthGenerator();
+	depth_generator.GetMetaData(dmd);
+	
+	const XnDepthPixel* depthRaw = dmd.Data();
+	unsigned char * depthPixels = sourceImg.getPixels();
+	
+	int numPixels = dmd.XRes() * dmd.YRes();
+	
+	for(int i = 0; i < numPixels; i++, depthRaw++) {
+		if((*depthRaw <= farThreshold) && (*depthRaw >= nearThreshold))
+			depthPixels[i] = ofMap(*depthRaw, nearThreshold, farThreshold, 255,0);
+		else 
+			depthPixels[i] = 0;
+	}
+	sourceImg.flagImageChanged();
+	sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
+}
 //Grab frame from CPU
 void ofxKCoreVision::grabFrameToCPU(){
-	sourceImg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-	grayThreshFar = sourceImg;
-	grayThresh = sourceImg;
-	grayThreshFar.threshold(farThreshold, true);
-	grayThresh.threshold(nearThreshold);
-	cvAnd(grayThresh.getCvImage(), grayThreshFar.getCvImage(), grayImage.getCvImage(), NULL);
-	grayImage.flagImageChanged();
-
-	//convert to grayscale
-	processedImg = grayImage;
-	sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
-	
+	getPixels();
+	processedImg = sourceImg;
 }
 
 //Grab frame from GPU
 void ofxKCoreVision::grabFrameToGPU(GLuint target){
 	//grab the frame to a raw openGL texture
-	
-	sourceImg.setFromPixels(kinect.getDepthPixels(), kinect.width, kinect.height);
-	grayThreshFar = sourceImg;
-	grayThresh = sourceImg;
-	grayThreshFar.threshold(farThreshold, true);
-	grayThresh.threshold(nearThreshold);
-	cvAnd(grayThresh.getCvImage(), grayThreshFar.getCvImage(), grayImage.getCvImage(), NULL);
+	//getPixels();
 	
 	glEnable(GL_TEXTURE_2D);
 	//glPixelStorei(1);
 	glBindTexture(GL_TEXTURE_2D, target);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, camWidth, camHeight, GL_RGB, GL_UNSIGNED_BYTE, grayImage.getPixels());
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, camWidth, camHeight, GL_RGB, GL_UNSIGNED_BYTE, sourceImg.getPixels());
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glBindTexture(GL_TEXTURE_2D,0);
-	sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
 }
 
 
@@ -376,9 +379,6 @@ void ofxKCoreVision::_draw(ofEventArgs &e)
 			
 			if(bDrawOutlines || bShowLabels) 
 				drawFingerOutlines();
-			
-			/*if(contourFinder.bTrackFiducials)
-				drawFiducials();*/
 
 			if(contourFinder.bTrackObjects && isSelecting){
 				ofNoFill();
@@ -415,8 +415,10 @@ void ofxKCoreVision::drawFullMode(){
 	string str0 = "FPS: ";
 	str0+= ofToString(fps, 0)+"\n";
 	
+	/*
 	string str1 = "Dist: ";
-	str1 += ofToString(nearThreshold) + " <-> " +  ofToString(farThreshold) + "\n";
+	str1 += ofToString(nearThreshold*0.01) + " <-> " +  ofToString(farThreshold*0.01) + "\n";
+	*/
 	
 	string str2 = "Resolution: ";
 	str2+= ofToString(camWidth, 0) + "x" + ofToString(camHeight, 0)  + "\n";
@@ -429,16 +431,17 @@ void ofxKCoreVision::drawFullMode(){
 	
 	string str4 = "Fingers: ";
 	str4+= ofToString(contourFinder.nFingers,0)+"\n";
-	
+	/*
 	string str5 = "Accel: ";
 	str5 += ofToString(kinect.getMksAccel().x,1) + "/" + ofToString(kinect.getMksAccel().y,1) + "/" + ofToString(kinect.getMksAccel().z,1) + "\n";
-	
+	*/
 	ofColor c;
 	c.setHex(0x969696);
 	ofSetColor(c);
-	verdana.drawString( str0 + str1 + str2 + str3 + str4 + str5 , 570, 430);
-
+	//verdana.drawString( str0 + str1 + str2 + str3 + str4 + str5 , 570, 430);
+	verdana.drawString( str0 + str2 + str3 + str4, 570, 430);
 	
+		
 	//TUIO data drawing
 		char buf[256]="";
 		if(myTUIO.bOSCMode && myTUIO.bTCPMode)
@@ -700,7 +703,7 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 			nearThreshold --;
 			if (nearThreshold < 0) nearThreshold = 0;
 			break;
-				
+		/*
 		case OF_KEY_UP:
 			angle++;
 			if(angle>30) angle=30;
@@ -712,7 +715,7 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 			if(angle<-30) angle=-30;
 			kinect.setCameraTiltAngle(angle);
 			break;
-				
+		*/
 		default:
 			break;
 		}
@@ -813,7 +816,7 @@ std::map<int,Blob> ofxKCoreVision::getObjects(){
 * ON EXIT
 *****************************************************************************/
 void ofxKCoreVision::_exit(ofEventArgs &e){
-	kinect.close();
+	//kinect.close();
 	saveSettings();
 
 	//Save templates
