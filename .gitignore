@@ -1,0 +1,9 @@
+
+.DS_Store
+*/.DS_Store
+
+build/*
+bin/*.app
+bin/.DS_Store
+
+src/.DS_Store
