@@ -1,9 +1,16 @@
 #ifndef _H_OFXHARDWAREDRIVER
 #define _H_OFXHARDWAREDRIVER
 
-// based on ROS kinect_aux.cpp driver and freenect tilt.c for controlling motor and accelerometers 
+// based on ROS kinect_aux.cpp driver and freenect tilt.c for controlling motor and accelerometers
 #include "ofMain.h"
-#include <libusb.h>
+
+#ifdef TARGET_OSX
+	#include <libusb.h>
+#endif
+
+#ifdef TARGET_LINUX
+	#include <libusb-1.0/libusb.h>
+#endif
 
 // VID and PID for Kinect and motor/acc/leds
 #define MS_MAGIC_VENDOR 0x45e
@@ -50,30 +57,30 @@ typedef struct {
 
 class ofxHardwareDriver {
 public:
-	
+
 	ofxHardwareDriver();
 	~ofxHardwareDriver();
-	
+
 	void	setup(int index = 0);
 	void	update();
-	
+
 	void	setTiltAngle(int angle);
 	int		getTiltAngle();
-	
+
 	void	setLedOption(uint16_t option);
-	
+
 	ofPoint	getAccelerometers();
-	
+
 	int		tilt_angle;
-	
+
 	void shutDown();
-	
+
 private:
-	
+
 	libusb_device_handle *dev;
-	
+
 	raw_tilt_state tilt_state;
-	
+
 };
 
 #endif

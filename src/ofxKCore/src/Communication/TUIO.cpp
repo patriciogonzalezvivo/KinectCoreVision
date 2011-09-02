@@ -31,7 +31,7 @@ void TUIO::setup(const char* host, int port, int flashport) {
 }
 
 void TUIO::setMode(bool blobs, bool fingers, bool objects) {
-	bBlobs	 = bBlobs;
+	bBlobs	 = true; //bBlobs;
 	bFingers = fingers;
 	bObjects = objects;
 }

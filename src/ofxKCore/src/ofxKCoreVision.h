@@ -31,7 +31,9 @@
 #define MAIN_WINDOW_WIDTH  320.0f
 #define MAIN_WINDOW_HEIGHT 240.0f
 
-class ofxKCoreVision : public ofxGuiListener{  // ofxGUI setup stuff
+class ofxKCoreVision : public ofxGuiListener{  
+
+// ofxGUI setup stuff
 enum {
 		propertiesPanel,
 		propertiesPanel_flipV,
@@ -207,10 +209,12 @@ public:
 	 ***************************************************************/
 	ofxOpenNIContext	context;
 	ofxDepthGenerator	depth;
+#if defined (TARGET_OSX) //|| defined(TARGET_LINUX) // only working on Mac/Linux at the moment (but on Linux you need to run as sudo...)
+	ofxHardwareDriver	hardware;
+#endif
 	
 	int					nearThreshold;
 	int					farThreshold;
-	int					angle;
 
 	/****************************************************************
 	 *            Variables in config.xml Settings file

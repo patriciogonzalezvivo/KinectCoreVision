@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<ActiveTarget name="Debug" />
+	<File name="../../../addons/ofxOsc/src/ofxOscReceiver.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="3990" topLine="115" />
+	</File>
+	<File name="src/ofxKCore/src/ofxKCoreVision.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="0" topLine="15" />
+	</File>
+</CodeBlocks_layout_file>

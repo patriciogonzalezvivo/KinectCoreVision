@@ -15,7 +15,7 @@
 #include <map>
 #include <string>
 
-#pragma warning(disable : 4244)	// 'conversion' conversion from 'type1' to 'type2' possible loss of data
+//#pragma warning(disable : 4244)	// 'conversion' conversion from 'type1' to 'type2' possible loss of data
 
 class FilterParameter{
 public:
@@ -39,8 +39,6 @@ class GPUImageFilter
 		int res_x, res_y;
 		bool useGeometryShader;
 		ShaderProgram* shader;
-
-		//GLuint output_texture;
 
 		const char* name;
 

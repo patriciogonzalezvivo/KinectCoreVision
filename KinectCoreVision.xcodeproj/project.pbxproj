@@ -243,7 +243,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3D8CAC6613E1AE6F00E275B0 /* Icon */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "Icon"; path = "src/ofxKCore/Icon\n"; sourceTree = SOURCE_ROOT; };
 		3D8CAC6913E1AE6F00E275B0 /* boxAlign.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = boxAlign.cpp; path = src/ofxKCore/src/Calibration/boxAlign.cpp; sourceTree = SOURCE_ROOT; };
 		3D8CAC6A13E1AE6F00E275B0 /* boxAlign.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = boxAlign.h; path = src/ofxKCore/src/Calibration/boxAlign.h; sourceTree = SOURCE_ROOT; };
 		3D8CAC6B13E1AE6F00E275B0 /* Calibration.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Calibration.cpp; path = src/ofxKCore/src/Calibration/Calibration.cpp; sourceTree = SOURCE_ROOT; };
@@ -899,7 +898,6 @@
 		3D8CAC6513E1AE6F00E275B0 /* ofxKCore */ = {
 			isa = PBXGroup;
 			children = (
-				3D8CAC6613E1AE6F00E275B0 /* Icon */,
 				3D8CAC6713E1AE6F00E275B0 /* src */,
 			);
 			name = ofxKCore;

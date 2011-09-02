@@ -12,7 +12,7 @@
 #include "tinyxml.h"
 #include "ofUtils.h"
 
-#pragma warning(disable : 4244)	// 'conversion' conversion from 'type1' to 'type2' possible loss of data
+//#pragma warning(disable : 4244)	// 'conversion' conversion from 'type1' to 'type2' possible loss of data
 
 //helper functon, should go somewhere else
 void getFrameBufferForTexture(GLuint* fbo, GLuint* tex, int sizeX, int sizeY){
@@ -130,7 +130,7 @@ GLuint GPUImageFilter::apply(GLuint inputTexture, GLuint inputTexture2){
 
     //render to the fbo using the shader
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, output_buffer);
-
+	
     glClearColor(0.0,1.0,0.0,1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0,0,res_x, res_y);
@@ -143,8 +143,6 @@ GLuint GPUImageFilter::apply(GLuint inputTexture, GLuint inputTexture2){
 
 	glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, inputTexture);
-
-
 
     this->shader->enable();
 

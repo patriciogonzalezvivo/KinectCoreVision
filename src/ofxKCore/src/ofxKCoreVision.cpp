@@ -38,7 +38,7 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 		time ( &rawtime );
 		timeinfo = localtime ( &rawtime );
 		strftime (fileName,80,"../logs/log_%B_%d_%y_%H_%M_%S.txt",timeinfo);
-		FILE *stream ;
+		FILE *stream;
 		sprintf(fileName, ofToDataPath(fileName).c_str());
 		if((stream = freopen(fileName, "w", stdout)) == NULL){}
 		/******************************************************************************************************/
@@ -145,9 +145,8 @@ void ofxKCoreVision::loadXMLSettings()
 	filter->bVerticalMirror		= XML.getValue("CONFIG:BOOLEAN:VMIRROR",0);
 	filter->bHorizontalMirror	= XML.getValue("CONFIG:BOOLEAN:HMIRROR",0);
 	
-	nearThreshold				= XML.getValue("CONFIG:KINECT:NEAR",500);
-	farThreshold				= XML.getValue("CONFIG:KINECT:FAR",800);
-	angle						= XML.getValue("CONFIG:KINECT:ANGLE",0);
+	nearThreshold				= XML.getValue("CONFIG:KINECT:NEAR",600);
+	farThreshold				= XML.getValue("CONFIG:KINECT:FAR",700);
 	
 	//Filters
 	filter->bTrackDark			= XML.getValue("CONFIG:BOOLEAN:TRACKDARK", 0);
@@ -196,7 +195,6 @@ void ofxKCoreVision::loadXMLSettings()
 void ofxKCoreVision::saveSettings(){
 	XML.setValue("CONFIG:KINECT:NEAR", nearThreshold);
 	XML.setValue("CONFIG:KINECT:FAR", farThreshold);
-	XML.setValue("CONFIG:KINECT:ANGLE", angle);
 	
 	XML.setValue("CONFIG:BOOLEAN:PRESSURE",bShowPressure);
 	XML.setValue("CONFIG:BOOLEAN:LABELS",bShowLabels);
@@ -244,6 +242,10 @@ void ofxKCoreVision::initDevice(){
 	
 	context.setup();
 	depth.setup(&context);
+#if defined (TARGET_OSX) //|| defined(TARGET_LINUX) // only working on Mac/Linux at the moment (but on Linux you need to run as sudo...)
+	hardware.setup();				// libusb direct control of motor, LED and accelerometers
+	hardware.setLedOption(LED_OFF); // turn off the led just for yacks (or for live installation/performances ;-)
+#endif
 	
 	cameraInited	=	true;
 	camWidth		=	depth.getWidth();
@@ -258,6 +260,10 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 	
 	context.update();
 	depth.update();
+#ifdef TARGET_OSX // only working on Mac at the moment
+	hardware.update();
+	//hardware.setTiltAngle(0);
+#endif
 	
 	//bNewFrame = kinect.isFrameNew();
 	bNewFrame = true;	// TODO: look how to this in the correct way; 
@@ -315,7 +321,6 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 *				Input Device Stuff
 ************************************************/
 void ofxKCoreVision::getPixels(){
-	
 	xn::DepthGenerator	depth_generator;
 	xn::DepthMetaData	dmd;
 	
@@ -334,18 +339,20 @@ void ofxKCoreVision::getPixels(){
 			depthPixels[i] = 0;
 	}
 	sourceImg.flagImageChanged();
-	sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
+	
 }
+
 //Grab frame from CPU
 void ofxKCoreVision::grabFrameToCPU(){
 	getPixels();
 	processedImg = sourceImg;
+	sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
 }
 
 //Grab frame from GPU
 void ofxKCoreVision::grabFrameToGPU(GLuint target){
 	//grab the frame to a raw openGL texture
-	//getPixels();
+	getPixels();
 	
 	glEnable(GL_TEXTURE_2D);
 	//glPixelStorei(1);
@@ -415,31 +422,27 @@ void ofxKCoreVision::drawFullMode(){
 	string str0 = "FPS: ";
 	str0+= ofToString(fps, 0)+"\n";
 	
-	/*
-	string str1 = "Dist: ";
-	str1 += ofToString(nearThreshold*0.01) + " <-> " +  ofToString(farThreshold*0.01) + "\n";
-	*/
+	string str1 = "Resolution: ";
+	str1+= ofToString(camWidth, 0) + "x" + ofToString(camHeight, 0)  + "\n";
 	
-	string str2 = "Resolution: ";
-	str2+= ofToString(camWidth, 0) + "x" + ofToString(camHeight, 0)  + "\n";
+	string str2 = "Blobs: ";
+	str2+= ofToString(contourFinder.nBlobs,0)+", "+ofToString(contourFinder.nObjects,0)+"\n";
 	
-	//string str4 = "Processing: ";
-	//str4+= ofToString(differenceTime, 0)+" ms \n";
-
-	string str3 = "Blobs: ";
-	str3+= ofToString(contourFinder.nBlobs,0)+", "+ofToString(contourFinder.nObjects,0)+"\n";
+	string str3 = "Fingers: ";
+	str3+= ofToString(contourFinder.nFingers,0)+"\n";
 	
-	string str4 = "Fingers: ";
-	str4+= ofToString(contourFinder.nFingers,0)+"\n";
-	/*
-	string str5 = "Accel: ";
-	str5 += ofToString(kinect.getMksAccel().x,1) + "/" + ofToString(kinect.getMksAccel().y,1) + "/" + ofToString(kinect.getMksAccel().z,1) + "\n";
-	*/
+	ofPoint statusAccelerometers = ofPoint(0,0,0);
+#ifdef TARGET_OSX // only working on Mac at the moment
+	statusAccelerometers = hardware.getAccelerometers();
+#endif
+	
+	string str4 = "Accel: ";
+	str4 += ofToString(statusAccelerometers.x,1) + "/" + ofToString(statusAccelerometers.y,1) + "/" + ofToString(statusAccelerometers.z,1) + "\n";
+	
 	ofColor c;
 	c.setHex(0x969696);
 	ofSetColor(c);
-	//verdana.drawString( str0 + str1 + str2 + str3 + str4 + str5 , 570, 430);
-	verdana.drawString( str0 + str2 + str3 + str4, 570, 430);
+	verdana.drawString( str0 + str1 + str2 + str3 + str4, 570, 430);
 	
 		
 	//TUIO data drawing
@@ -492,10 +495,8 @@ void ofxKCoreVision::drawMiniMode(){
 
 	//draw text
 	ofSetColor(250,250,250);
-	verdana.drawString("Calc. Time  [ms]:        " + ofToString(differenceTime,0),10, ofGetHeight() - 70 );
-	verdana.drawString("Kinect [fps]:            " + ofToString(fps,0),10, ofGetHeight() - 50 );
-	//verdana.drawString("Blob Count:               " + ofToString(contourFinder.nBlobs,0),10, ofGetHeight() - 29 );
-	//verdana.drawString("Communication:  " ,10, ofGetHeight() - 9 );
+	verdana.drawString(" [ms]:" + ofToString(differenceTime,0),10, ofGetHeight() - 70 );
+	verdana.drawString("[fps]:" + ofToString(fps,0),10, ofGetHeight() - 50 );
 
 	//draw green tuio circle
 	if((myTUIO.bIsConnected || myTUIO.bOSCMode) && bTUIOMode)
@@ -683,39 +684,18 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 				controls->update(appPtr->TemplatePanel_maxArea, kofxGui_Set_Float, &appPtr->maxTempArea, sizeof(float));
 			}
 			break;
-		case '>':
-		case '.':
-			farThreshold ++;
-			if (farThreshold > 255) farThreshold = 255;
-			break;
-		case '<':		
-		case ',':		
-			farThreshold --;
-			if (farThreshold < 0) farThreshold = 0;
-			break;
-				
-		case '+':
-		case '=':
-			nearThreshold ++;
-			if (nearThreshold > 255) nearThreshold = 255;
-			break;
-		case '-':		
-			nearThreshold --;
-			if (nearThreshold < 0) nearThreshold = 0;
-			break;
-		/*
 		case OF_KEY_UP:
-			angle++;
-			if(angle>30) angle=30;
-			kinect.setCameraTiltAngle(angle);
+			farThreshold++;
 			break;
-				
-		case OF_KEY_DOWN:
-			angle--;
-			if(angle<-30) angle=-30;
-			kinect.setCameraTiltAngle(angle);
+		case OF_KEY_DOWN:		
+			farThreshold--;
 			break;
-		*/
+		case OF_KEY_RIGHT:
+			nearThreshold++;
+			break;
+		case OF_KEY_LEFT:		
+			nearThreshold--;
+			break;
 		default:
 			break;
 		}

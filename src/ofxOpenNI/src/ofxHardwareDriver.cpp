@@ -106,7 +106,7 @@ void ofxHardwareDriver::setTiltAngle(int angle)
 		printf("Error in setting tilt angle, libusb_control_transfer returned %i", ret);
 		return;
 	}
-	
+
 	//tilt_angle = angle;
 }
 
