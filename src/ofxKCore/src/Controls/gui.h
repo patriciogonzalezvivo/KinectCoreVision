@@ -126,8 +126,8 @@ void ofxKCoreVision::setupControls()
 
 	//Distance (ex template)
 	ofxGuiPanel* tPanel = controls->addPanel(appPtr->TemplatePanel, "Distance between:", 31, 315, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
-	tPanel->addSlider(appPtr->TemplatePanel_minArea, "Near mm", 140, 13, 0, 1000, nearThreshold, kofxGui_Display_Int, 1);
-	tPanel->addSlider(appPtr->TemplatePanel_maxArea, "Far mm", 140, 13, 0, 1000, farThreshold, kofxGui_Display_Int, 1);
+	tPanel->addSlider(appPtr->TemplatePanel_minArea, "Near mm", 140, 13, 0, 4000, nearThreshold, kofxGui_Display_Int, 1);
+	tPanel->addSlider(appPtr->TemplatePanel_maxArea, "Far mm", 140, 13, 0, 4000, farThreshold, kofxGui_Display_Int, 1);
 	tPanel->mObjWidth = 319;
 	tPanel->mObjHeight = 60;
 	tPanel->mObjects[0]->mObjY = 25;

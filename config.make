@@ -10,7 +10,7 @@ OF_ROOT = ../../..
 # for example search paths like:
 # USER_CFLAGS = -I src/objects
 
-USER_CFLAGS = -I src/ofxKCore/src -I src/ofxKCore/src -I src/ofxOpenNI/src -I src/ofxOpenNI/include
+USER_CFLAGS = -I src/ofxKCore/src -I src/ofxKCore/src -I src/ofxOpenNI/src -I src/ofxOpenNI/include -I /usr/include/ni
 
 
 # USER_LDFLAGS allows to pass custom flags to the linker
