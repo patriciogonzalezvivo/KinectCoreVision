@@ -6,9 +6,9 @@ Original designed for multitouch tables now it could be usefull for any interact
 
 ##Compilation Requirements##
 
-- Requires las version of [openFrameworks from gitHub](http://github.com/openframeworks/openFrameworks.git)
-- Requires last OpenNI, NITE and PrimeSense drivers
-- Requires las [avin2 SensorKinect](http://github.com/avin2/SensorKinect) drivers 
+- Requires last version of [openFrameworks from gitHub](http://github.com/openframeworks/openFrameworks.git) installed
+- Requires last [OpenNI, NITE and PrimeSense(http://openni.org/) drivers installed
+- Requires last [avin2 SensorKinect](http://github.com/avin2/SensorKinect) drivers installed
 
 ##How to use it?##
 http://vimeo.com/20904879
