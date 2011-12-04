@@ -15,6 +15,12 @@ struct ofxLimb {
 		position[0].X = position[1].X = 0;
 		position[0].Y = position[1].Y = 0;
 		position[0].Z = position[1].Z = 0;
+		
+		pPosition[0].X = pPosition[1].X = 0;
+		pPosition[0].Y = pPosition[1].Y = 0;
+		pPosition[0].Z = pPosition[1].Z = 0;
+		
+		
 	}
 
 	ofxLimb(){};
@@ -24,6 +30,7 @@ struct ofxLimb {
 	XnSkeletonJoint start_joint;
 	XnSkeletonJoint end_joint;
 	XnPoint3D position[2];
+	XnPoint3D pPosition[2];
 	bool found;
 
 	void debugDraw() {

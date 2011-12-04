@@ -242,10 +242,6 @@ void ofxKCoreVision::initDevice(){
 	
 	context.setup();
 	depth.setup(&context);
-#if defined (TARGET_OSX) //|| defined(TARGET_LINUX) // only working on Mac/Linux at the moment (but on Linux you need to run as sudo...)
-	hardware.setup();				// libusb direct control of motor, LED and accelerometers
-	hardware.setLedOption(LED_OFF); // turn off the led just for yacks (or for live installation/performances ;-)
-#endif
 	
 	cameraInited	=	true;
 	camWidth		=	depth.getWidth();
@@ -260,10 +256,6 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 	
 	context.update();
 	depth.update();
-#ifdef TARGET_OSX // only working on Mac at the moment
-	hardware.update();
-	//hardware.setTiltAngle(0);
-#endif
 	
 	//bNewFrame = kinect.isFrameNew();
 	bNewFrame = true;	// TODO: look how to this in the correct way; 
@@ -430,19 +422,11 @@ void ofxKCoreVision::drawFullMode(){
 	
 	string str3 = "Fingers: ";
 	str3+= ofToString(contourFinder.nFingers,0)+"\n";
-	
-	ofPoint statusAccelerometers = ofPoint(0,0,0);
-#ifdef TARGET_OSX // only working on Mac at the moment
-	statusAccelerometers = hardware.getAccelerometers();
-#endif
-	
-	string str4 = "Accel: ";
-	str4 += ofToString(statusAccelerometers.x,1) + "/" + ofToString(statusAccelerometers.y,1) + "/" + ofToString(statusAccelerometers.z,1) + "\n";
-	
+		
 	ofColor c;
 	c.setHex(0x969696);
 	ofSetColor(c);
-	verdana.drawString( str0 + str1 + str2 + str3 + str4, 570, 430);
+	verdana.drawString( str0 + str1 + str2 + str3, 570, 430);
 	
 		
 	//TUIO data drawing

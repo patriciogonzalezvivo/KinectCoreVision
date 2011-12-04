@@ -16,8 +16,10 @@ public:
 	ofxUserGenerator();
 	~ofxUserGenerator(){};
 	
+	bool				setup(ofxOpenNIContext* pContext, bool aSkel);
 	bool				setup(ofxOpenNIContext* pContext);
-	
+
+	bool autoSkeleton;
 	void				draw();
 	void				update();
 
@@ -34,7 +36,7 @@ public:
 	float				getSmoothing();
 	
 	xn::UserGenerator&	getXnUserGenerator();
-	
+	void				saveCalibration(XnUserID nID);
 	void				setMaxNumberOfUsers(int nUsers);
 	int					getNumberOfTrackedUsers();
 	ofxTrackedUser*		getTrackedUser(int nUserNum);
@@ -44,6 +46,9 @@ public:
 	
 	int					getWidth();
 	int					getHeight();
+	
+	bool loadCalibration(XnUserID uId);
+	
 	
 private:
 	

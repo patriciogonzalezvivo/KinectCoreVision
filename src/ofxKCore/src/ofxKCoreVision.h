@@ -17,7 +17,7 @@
 
 #include "ofxOpenCv.h"
 //#include "ofxDirList.h"
-#include "ofxNetwork.h"
+//#include "ofxNetwork.h"
 #include "ofxOsc.h"
 #include "ofxXmlSettings.h"
 
@@ -209,9 +209,6 @@ public:
 	 ***************************************************************/
 	ofxOpenNIContext	context;
 	ofxDepthGenerator	depth;
-#if defined (TARGET_OSX) //|| defined(TARGET_LINUX) // only working on Mac/Linux at the moment (but on Linux you need to run as sudo...)
-	ofxHardwareDriver	hardware;
-#endif
 	
 	int					nearThreshold;
 	int					farThreshold;

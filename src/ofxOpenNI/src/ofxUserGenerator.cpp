@@ -5,14 +5,12 @@
 // CALLBACKS
 // =============================================================================
 // Callback: New user was detected
-void XN_CALLBACK_TYPE User_NewUser(
-	xn::UserGenerator& rGenerator
-	,XnUserID nID
-	,void* pCookie
-)
-{
+void XN_CALLBACK_TYPE User_NewUser(xn::UserGenerator& rGenerator, XnUserID nID, void* pCookie){
+
 	printf("New User %d\n", nID);
 	ofxUserGenerator* user = static_cast<ofxUserGenerator*>(pCookie);
+	
+	if (!user->loadCalibration(nID)){
 	if(user->needsPoseForCalibration()) {
 		user->startPoseDetection(nID);
 	}
@@ -20,31 +18,25 @@ void XN_CALLBACK_TYPE User_NewUser(
 		user->requestCalibration(nID);	
 	}
 }
+}
 
 // Callback: An existing user was lost
 void XN_CALLBACK_TYPE User_LostUser(
-	xn::UserGenerator& rGenerator
-	,XnUserID nID
-	,void* pCookie
-)
-{
+	xn::UserGenerator& rGenerator, XnUserID nID, void* pCookie){
 	printf("Lost user %d\n", nID);
 	rGenerator.GetSkeletonCap().Reset(nID);
-	
 }
 
 // Callback: Detected a pose
 void XN_CALLBACK_TYPE UserPose_PoseDetected(
-	xn::PoseDetectionCapability& rCapability
-	,const XnChar* strPose
-	,XnUserID nID
-	,void* pCookie
-)
-{
+	xn::PoseDetectionCapability& rCapability, const XnChar* strPose, XnUserID nID, void* pCookie){
+	
 	ofxUserGenerator* user = static_cast<ofxUserGenerator*>(pCookie);
-	printf("Pose %s detected for user %d\n", strPose, nID);
+	if (user->autoSkeleton==false){
+		printf("Pose %s detected for user %d\n", strPose, nID);
 	user->stopPoseDetection(nID);
 	user->requestCalibration(nID);
+	}
 }
 
 
@@ -69,7 +61,9 @@ void XN_CALLBACK_TYPE UserCalibration_CalibrationEnd(
 	ofxUserGenerator* user = static_cast<ofxUserGenerator*>(pCookie);
 	if(bSuccess) {
 		printf("+++++++++++++++++++++++ Succesfully tracked user: %d\n", nID);
+		user->saveCalibration(nID);
 		user->startTracking(nID);
+		
 	}
 	else {
 		if(user->needsPoseForCalibration()) {
@@ -95,6 +89,11 @@ void ofxUserGenerator::startPoseDetection(XnUserID nID) {
 	user_generator.GetPoseDetectionCap().StartPoseDetection(calibration_pose, nID);
 }
 
+void ofxUserGenerator::saveCalibration(XnUserID nID) {
+	//user_generator.GetSkeletonCap().SaveCalibrationDataToFile(nID, "SkeletonCal.bin");
+	printf("Calibration Data Saved.\n");
+}
+
 
 //----------------------------------------
 void ofxUserGenerator::stopPoseDetection(XnUserID nID) {
@@ -110,17 +109,23 @@ void ofxUserGenerator::requestCalibration(XnUserID nID) {
 
 // Setup the user generator.
 //----------------------------------------
-bool ofxUserGenerator::setup( ofxOpenNIContext* pContext) {
+bool ofxUserGenerator::setup( ofxOpenNIContext* pContext) { ///Default setup  with autoSkeleton.
+	return setup(pContext, true);
+}
+bool ofxUserGenerator::setup( ofxOpenNIContext* pContext, bool aSkel) {
 	
 	// store context and generator references
 	context	= pContext;
 	context->getDepthGenerator(&depth_generator);
 	context->getImageGenerator(&image_generator);
 	
+	autoSkeleton=aSkel;
+	
 	XnStatus result = XN_STATUS_OK;
 	
 	// get map_mode so we can setup width and height vars from depth gen size
 	XnMapOutputMode map_mode; 
+	
 	depth_generator.GetMapOutputMode(map_mode);
 	
 	width = map_mode.nXRes;
@@ -164,6 +169,12 @@ bool ofxUserGenerator::setup( ofxOpenNIContext* pContext) {
 		,user_cb_handle
 	);
 	
+	for(int i = 0; i < MAX_NUMBER_USERS; ++i) {
+		printf("Creting user: %i\n", i+1);
+		ofxTrackedUser* tracked_user = new ofxTrackedUser(context);
+		tracked_users[i] = tracked_user;
+	}
+	//if(!autoSkeleton){
 	XnCallbackHandle calibration_cb_handle;
 	user_generator.GetSkeletonCap().RegisterCalibrationCallbacks(
 		 UserCalibration_CalibrationStart
@@ -194,6 +205,10 @@ bool ofxUserGenerator::setup( ofxOpenNIContext* pContext) {
 		user_generator.GetSkeletonCap().GetCalibrationPose(calibration_pose);
 		
 	}
+	/*}else{
+		loadCalibration();
+	
+	}*/
 	
 	user_generator.GetSkeletonCap().SetSkeletonProfile(XN_SKEL_PROFILE_ALL);
 	
@@ -204,14 +219,36 @@ bool ofxUserGenerator::setup( ofxOpenNIContext* pContext) {
 	CHECK_RC(result, "StartGenerating");
 
 	// pre-generate the tracked users.
-	for(int i = 0; i < MAX_NUMBER_USERS; ++i) {
-		printf("Creting user: %i\n", i+1);
-		ofxTrackedUser* tracked_user = new ofxTrackedUser(context);
-		tracked_users[i] = tracked_user;
-	}
+	
 
 	return true;
 }
+
+bool ofxUserGenerator::loadCalibration(XnUserID uId){
+
+	// Find a user who isn't calibrated or currently in pose
+	if (user_generator.GetSkeletonCap().IsCalibrated(uId)) return true;
+	if (user_generator.GetSkeletonCap().IsCalibrating(uId)) return true;
+	
+	// Load user's calibration from file
+	cout << ofToDataPath( "UserCalibration.bin", true) << endl;
+	
+	string calib = ofToDataPath( "UserCalibration.bin", true);
+	const char *p;
+	p=&calib[0];
+	XnStatus rc = user_generator.GetSkeletonCap().LoadCalibrationDataFromFile(uId, p );
+	if (rc == XN_STATUS_OK){
+		printf("Auto Skeleton data loaded OK. User: %i\n", uId);
+		// Make sure state is coherent
+		user_generator.GetPoseDetectionCap().StopPoseDetection(uId);
+		user_generator.GetSkeletonCap().StartTracking(uId);
+		return true;
+	}else {
+		printf("Auto Skeleton failed. User: %i\n", uId);
+		return false;
+	}
+}
+
 
 
 // Draw a specific user (start counting at 0)
@@ -248,11 +285,21 @@ void ofxUserGenerator::draw() {
 
 // Get a tracked user.
 //----------------------------------------
+
 ofxTrackedUser* ofxUserGenerator::getTrackedUser(int nUserNum) {
-	
-	if(nUserNum - 1 > found_users)
+	//cout << "ofxUserGenerator::getTrackedUser"<<endl;
+	if(nUserNum - 1 > found_users){
+		//cout << "NULL ofxTrackedUser pointer."<<endl;
 		return NULL;
-	return tracked_users[nUserNum - 1];
+	}
+	if (tracked_users[nUserNum - 1]) {
+		//cout << "Valid ofxTrackedUser pointer."<<endl;
+	return tracked_users[nUserNum - 1];	
+	}else{
+		//cout << "NULL ofxTrackedUser pointer."<<endl;
+		return NULL;
+	}
+	
 	
 }
 
@@ -271,7 +318,6 @@ int ofxUserGenerator::getNumberOfTrackedUsers() {
 // Update the tracked users, should be called each frame
 //----------------------------------------
 void ofxUserGenerator::update() {
-	
 	found_users = max_num_users;
 	
 	XnUserID* users = new XnUserID[max_num_users];
@@ -282,6 +328,7 @@ void ofxUserGenerator::update() {
 			tracked_users[i]->id = users[i];
 			tracked_users[i]->updateBonePositions();
 		}
+		
 	}
 	
 	delete [] users;
@@ -297,6 +344,7 @@ void ofxUserGenerator::setUseMaskPixels(bool b) {
 void ofxUserGenerator::setUseCloudPoints(bool b) {
 	useCloudPoints = b;
 }
+
 
 // return user pixels -> use 0 (default) to get all user masks
 // or specify a number if you want seperate masks
@@ -442,6 +490,28 @@ int ofxUserGenerator::getHeight() {
 	return height;
 }
 
+//----------------------------------------
+/*
+void ofxUserGenerator::drawParticles(testApp* testapp){
+
+	
+	if (tracked_users[i]->neck.getFound()) {	
+		addToFluid(tracked_users[i]->neck.position[0].X, tracked_users[i]->neck.position[0].Y, vx, vy);
+	}if (tracked_users[i]->left_shoulder.getFound()) {
+		addToFluid(tracked_users[i]->left_shoulder.position[0].X, tracked_users[i]->left_shoulder.position[0].Y, vx, vy);
+	}if (tracked_users[i]->left_upper_arm.getFound()) {
+		addToFluid(tracked_users[i]->left_upper_arm.position[0].X, tracked_users[i]->left_upper_arm.position[0].Y, vx, vy);
+	}if (tracked_users[i]->left_lower_arm.getFound()) {
+		addToFluid(tracked_users[i]->left_lower_arm.position[0].X, tracked_users[i]->left_lower_arm.position[0].Y, vx, vy);
+	}if (tracked_users[i]->right_shoulder.getFound()) {
+		addToFluid(tracked_users[i]->right_shoulder.position[0].X, tracked_users[i]-> right_shoulder.position[0].Y, vx, vy);
+	}if (tracked_users[i]->right_upper_arm.getFound()) {
+		addToFluid(tracked_users[i]->right_upper_arm.position[0].X, tracked_users[i]->right_upper_arm.position[0].Y, vx, vy);
+	}if (tracked_users[i]->right_lower_arm.getFound()) {
+		addToFluid(tracked_users[i]->right_lower_arm.position[0].X, tracked_users[i]->right_lower_arm.position[0].Y, vx, vy);
+	}
+
+}*/
 //----------------------------------------
 void ofxUserGenerator::startTracking(XnUserID nID) {
 	user_generator.GetSkeletonCap().StartTracking(nID);

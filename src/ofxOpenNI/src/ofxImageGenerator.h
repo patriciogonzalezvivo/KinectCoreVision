@@ -16,8 +16,8 @@ public:
 	
 	xn::ImageGenerator& getXnImageGenerator();
 	
-	unsigned char *		getPixels(){return &image_pixels[0];};
-
+	unsigned char* getPixels();
+	
 private:
 	
 	void generateTexture();
@@ -25,6 +25,9 @@ private:
 	xn::ImageGenerator	image_generator;
 	ofTexture			image_texture;
 	unsigned char *		image_pixels;
+	
+	ofxImageGenerator(ofxImageGenerator const& other);
+	ofxImageGenerator & operator = (const ofxImageGenerator&);
 	
 };
 

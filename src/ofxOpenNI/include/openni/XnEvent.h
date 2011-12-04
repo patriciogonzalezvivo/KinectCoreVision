@@ -1,6 +1,6 @@
 /****************************************************************************
 *                                                                           *
-*  OpenNI 1.1 Alpha                                                         *
+*  OpenNI 1.x Alpha                                                         *
 *  Copyright (C) 2011 PrimeSense Ltd.                                       *
 *                                                                           *
 *  This file is part of OpenNI.                                             *
@@ -53,7 +53,7 @@ public:
 		xnOSCreateCriticalSection(&m_hLock);
 	}
 
-	~XnEvent()
+	virtual ~XnEvent()
 	{
 		Clear();
 		xnOSCloseCriticalSection(&m_hLock);
@@ -100,7 +100,13 @@ public:
 		// function).
 		{
 			XnAutoCSLocker lock(m_hLock);
-			nRetVal = m_ToBeRemoved.AddLast(pObject);
+
+			// try to remove it from the ToBeAdded list.
+			if (!RemoveCallback(m_ToBeAdded, pObject))
+			{
+				// it's not in this list, so it's probably in the main list
+				nRetVal = m_ToBeRemoved.AddLast(pObject);
+			}
 		}
 		XN_IS_STATUS_OK(nRetVal);
 
@@ -137,15 +143,7 @@ protected:
 		for (XnCallbackPtrList::ConstIterator it = m_ToBeRemoved.begin(); it != m_ToBeRemoved.end(); ++it)
 		{
 			XnCallback* pCallback = *it;
-
-			// check if it's in the list
-			XnCallbackPtrList::Iterator handlerIt = m_Handlers.Find(pCallback);
-			if (handlerIt != m_Handlers.end())
-			{
-				m_Handlers.Remove(handlerIt);
-			}
-
-			XN_DELETE(pCallback);
+			RemoveCallback(m_Handlers, pCallback);
 		}
 		m_ToBeRemoved.Clear();
 
@@ -167,17 +165,33 @@ protected:
 	XnCallbackPtrList m_Handlers;
 	XnCallbackPtrList m_ToBeAdded;
 	XnCallbackPtrList m_ToBeRemoved;
+
+private:
+	XnBool RemoveCallback(XnCallbackPtrList& list, XnCallback* pCallback)
+	{
+		XnCallbackPtrList::Iterator handlerIt = list.Find(pCallback);
+		if (handlerIt != list.end())
+		{
+			list.Remove(handlerIt);
+			XN_DELETE(pCallback);
+			return TRUE;
+		}
+
+		return FALSE;
+	}
 };
 
-#define _XN_RAISE_WITH_RET_CODE(args)			\
-	nRetVal = pFunc(args pCallback->pCookie);	\
-	if (nRetVal != XN_STATUS_OK)				\
-	{											\
-		XnEvent::ApplyListChanges();			\
-		return (nRetVal);						\
+#define _XN_RAISE_WITH_RET_CODE(args)						\
+	{														\
+		XnStatus nRetVal = pFunc(args pCallback->pCookie);	\
+		if (nRetVal != XN_STATUS_OK)						\
+		{													\
+			XnEvent::ApplyListChanges();					\
+			return (nRetVal);								\
+		}													\
 	}
 
-#define _XN_RAISE_NO_RET_CODE(args)				\
+#define _XN_RAISE_NO_RET_CODE(args)						\
 	pFunc(args pCallback->pCookie);
 
 /**
@@ -205,7 +219,6 @@ protected:
 		}																									\
 		XnStatus Raise(_raise_sign)																			\
 		{																									\
-			XnStatus nRetVal = XN_STATUS_OK;																\
 			XnAutoCSLocker lock(m_hLock);																	\
 			XnEvent::ApplyListChanges();																	\
 			XnEvent::XnCallbackPtrList::Iterator it = XnEvent::m_Handlers.begin();							\

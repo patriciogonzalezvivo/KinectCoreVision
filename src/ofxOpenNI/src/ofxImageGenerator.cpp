@@ -18,6 +18,9 @@ void ofxImageGenerator::generateTexture() {
 	image_texture.loadData(image_pixels,imd.XRes(), imd.YRes(), GL_RGB);		
 }
 
+unsigned char* ofxImageGenerator::getPixels() {
+	return  image_pixels;
+}
 void ofxImageGenerator::update() {
 	generateTexture();
 }
@@ -46,6 +49,8 @@ bool ofxImageGenerator::setup(ofxOpenNIContext* pContext) {
 	} else {
 		result = image_generator.Create(pContext->getXnContext());
 		CHECK_RC(result, "Creating image generator");
+		
+		if (result != XN_STATUS_OK) return false;
 		
 		// make new map mode -> default to 640 x 480 @ 30fps
 		map_mode.nXRes = XN_VGA_X_RES;
