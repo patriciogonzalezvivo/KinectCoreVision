@@ -18,12 +18,12 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 	threshold = 80;
 	nearThreshold = 550;
 	farThreshold  = 650;
-	
+
 	//set the title
 	ofSetWindowTitle("Kinect Vision based on CCV v2");
 
 	//create filter
-	if(filter == NULL)	
+	if(filter == NULL)
 		filter = new ProcessFilters();
 
 	//Load Settings from config.xml file
@@ -85,7 +85,7 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 
 	//Allocate Filters
 	filter->allocate( camWidth, camHeight );
-	
+
 	/*****************************************************************************************************
 	* Startup Modes
 	******************************************************************************************************/
@@ -144,10 +144,10 @@ void ofxKCoreVision::loadXMLSettings()
 	filter->bLearnBakground		= XML.getValue("CONFIG:BOOLEAN:LEARNBG",0);
 	filter->bVerticalMirror		= XML.getValue("CONFIG:BOOLEAN:VMIRROR",0);
 	filter->bHorizontalMirror	= XML.getValue("CONFIG:BOOLEAN:HMIRROR",0);
-	
+
 	nearThreshold				= XML.getValue("CONFIG:KINECT:NEAR",600);
 	farThreshold				= XML.getValue("CONFIG:KINECT:FAR",700);
-	
+
 	//Filters
 	filter->bTrackDark			= XML.getValue("CONFIG:BOOLEAN:TRACKDARK", 0);
 	filter->bHighpass			= XML.getValue("CONFIG:BOOLEAN:HIGHPASS",1);
@@ -162,7 +162,7 @@ void ofxKCoreVision::loadXMLSettings()
 	MIN_BLOB_SIZE				= XML.getValue("CONFIG:INT:MINBLOBSIZE",2);
 	MAX_BLOB_SIZE				= XML.getValue("CONFIG:INT:MAXBLOBSIZE",100);
 	backgroundLearnRate			= XML.getValue("CONFIG:INT:BGLEARNRATE", 0.01f);
-	
+
 	//Filter Settings
 	filter->threshold			= XML.getValue("CONFIG:INT:THRESHOLD",0);
 	filter->highpassBlur		= XML.getValue("CONFIG:INT:HIGHPASSBLUR",0);
@@ -172,12 +172,12 @@ void ofxKCoreVision::loadXMLSettings()
 	minTempArea					= XML.getValue("CONFIG:INT:MINTEMPAREA",0);
 	maxTempArea					= XML.getValue("CONFIG:INT:MAXTEMPAREA",0);
 	hullPress					= XML.getValue("CONFIG:INT:HULLPRESS",20.0);
-	
+
 	//Tracking Options
 	contourFinder.bTrackBlobs	= XML.getValue("CONFIG:BOOLEAN:TRACKBLOBS",0);
 	contourFinder.bTrackFingers	= XML.getValue("CONFIG:BOOLEAN:TRACKFINGERS",0);
 	contourFinder.bTrackObjects	= XML.getValue("CONFIG:BOOLEAN:TRACKOBJECTS",0);
-	
+
 	//NETWORK SETTINGS
 	bTUIOMode					= XML.getValue("CONFIG:BOOLEAN:TUIO",0);
 	myTUIO.bOSCMode				= XML.getValue("CONFIG:BOOLEAN:OSCMODE",1);
@@ -195,7 +195,7 @@ void ofxKCoreVision::loadXMLSettings()
 void ofxKCoreVision::saveSettings(){
 	XML.setValue("CONFIG:KINECT:NEAR", nearThreshold);
 	XML.setValue("CONFIG:KINECT:FAR", farThreshold);
-	
+
 	XML.setValue("CONFIG:BOOLEAN:PRESSURE",bShowPressure);
 	XML.setValue("CONFIG:BOOLEAN:LABELS",bShowLabels);
 	XML.setValue("CONFIG:BOOLEAN:OUTLINES",bDrawOutlines);
@@ -239,10 +239,10 @@ void ofxKCoreVision::saveSettings(){
 void ofxKCoreVision::initDevice(){
 	//save/update log file
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
-	
+
 	context.setup();
 	depth.setup(&context);
-	
+
 	cameraInited	=	true;
 	camWidth		=	depth.getWidth();
 	camHeight		=	depth.getHeight();
@@ -253,13 +253,13 @@ void ofxKCoreVision::initDevice(){
 *****************************************************************************/
 void ofxKCoreVision::_update(ofEventArgs &e){
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
-	
+
 	context.update();
 	depth.update();
-	
+
 	//bNewFrame = kinect.isFrameNew();
-	bNewFrame = true;	// TODO: look how to this in the correct way; 
-	
+	bNewFrame = true;	// TODO: look how to this in the correct way;
+
 	if(!bNewFrame){
 		return;			//if no new frame, return
 	} else {			//else process camera frame
@@ -276,15 +276,15 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 
 		float beforeTime = ofGetElapsedTimeMillis();
 
-		if (bGPUMode){
-			grabFrameToGPU(filter->gpuSourceTex);
-			filter->applyGPUFilters();
-			contourFinder.findContours(filter->gpuReadBackImageGS,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress , false);
-		} else {
+	//	if (bGPUMode){
+	//		grabFrameToGPU(filter->gpuSourceTex);
+	//		filter->applyGPUFilters();
+	//		contourFinder.findContours(filter->gpuReadBackImageGS,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress , false);
+	//	} else {
 			grabFrameToCPU();
 			filter->applyCPUFilters( processedImg );
 			contourFinder.findContours(processedImg,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress, false);
-		}
+	//	}
 
 		//If Object tracking or Finger tracking is enabled
 		if( contourFinder.bTrackBlobs || contourFinder.bTrackFingers || contourFinder.bTrackObjects)
@@ -315,23 +315,23 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 void ofxKCoreVision::getPixels(){
 	xn::DepthGenerator	depth_generator;
 	xn::DepthMetaData	dmd;
-	
+
 	depth_generator = depth.getXnDepthGenerator();
 	depth_generator.GetMetaData(dmd);
-	
+
 	const XnDepthPixel* depthRaw = dmd.Data();
 	unsigned char * depthPixels = sourceImg.getPixels();
-	
+
 	int numPixels = dmd.XRes() * dmd.YRes();
-	
+
 	for(int i = 0; i < numPixels; i++, depthRaw++) {
 		if((*depthRaw <= farThreshold) && (*depthRaw >= nearThreshold))
 			depthPixels[i] = ofMap(*depthRaw, nearThreshold, farThreshold, 255,0);
-		else 
+		else
 			depthPixels[i] = 0;
 	}
 	sourceImg.flagImageChanged();
-	
+
 }
 
 //Grab frame from CPU
@@ -345,7 +345,7 @@ void ofxKCoreVision::grabFrameToCPU(){
 void ofxKCoreVision::grabFrameToGPU(GLuint target){
 	//grab the frame to a raw openGL texture
 	getPixels();
-	
+
 	glEnable(GL_TEXTURE_2D);
 	//glPixelStorei(1);
 	glBindTexture(GL_TEXTURE_2D, target);
@@ -375,8 +375,8 @@ void ofxKCoreVision::_draw(ofEventArgs &e)
 		//if full mode
 		else if (bShowInterface){
 			drawFullMode();
-			
-			if(bDrawOutlines || bShowLabels) 
+
+			if(bDrawOutlines || bShowLabels)
 				drawFingerOutlines();
 
 			if(contourFinder.bTrackObjects && isSelecting){
@@ -391,7 +391,7 @@ void ofxKCoreVision::_draw(ofEventArgs &e)
 		}
 
 		//draw gui controls
-		if (!bCalibration && !bMiniMode) 
+		if (!bCalibration && !bMiniMode)
 			controls->draw();
 	}
 }
@@ -402,33 +402,33 @@ void ofxKCoreVision::drawFullMode(){
 	background.draw(0,0);
 
 	//Draw Image Filters To Screen
-	if (bGPUMode)
-		filter->drawGPU();
-	else {
+//	if (bGPUMode)
+//		filter->drawGPU();
+//	else {
 		sourceImg.draw(30, 15, 320, 240);
 		filter->draw();
-	}
+//	}
 
 	ofSetColor(255);
 
 	string str0 = "FPS: ";
 	str0+= ofToString(fps, 0)+"\n";
-	
+
 	string str1 = "Resolution: ";
 	str1+= ofToString(camWidth, 0) + "x" + ofToString(camHeight, 0)  + "\n";
-	
+
 	string str2 = "Blobs: ";
 	str2+= ofToString(contourFinder.nBlobs,0)+", "+ofToString(contourFinder.nObjects,0)+"\n";
-	
+
 	string str3 = "Fingers: ";
 	str3+= ofToString(contourFinder.nFingers,0)+"\n";
-		
+
 	ofColor c;
 	c.setHex(0x969696);
 	ofSetColor(c);
 	verdana.drawString( str0 + str1 + str2 + str3, 570, 430);
-	
-		
+
+
 	//TUIO data drawing
 		char buf[256]="";
 		if(myTUIO.bOSCMode && myTUIO.bTCPMode)
@@ -456,12 +456,12 @@ void ofxKCoreVision::drawMiniMode(){
 	//black background
 	ofSetColor(0,0,0);
 	ofRect(0,0,ofGetWidth(), ofGetHeight());
-	
+
 	//draw outlines
 	if (bDrawOutlines){
 		for (int i=0; i<contourFinder.nBlobs; i++)
 			contourFinder.blobs[i].drawContours(0,0, camWidth, camHeight+175, ofGetWidth(), ofGetHeight());
-		
+
 		for (int i=0; i<contourFinder.nFingers; i++)
 			contourFinder.fingers[i].drawCenter(0,0, camWidth, camHeight+175, ofGetWidth(), ofGetHeight());
 
@@ -493,14 +493,14 @@ void ofxKCoreVision::drawMiniMode(){
 }
 
 void ofxKCoreVision::drawFingerOutlines(){
-	
+
 	//Find the blobs for drawing
 	if(contourFinder.bTrackBlobs){
 		for (int i=0; i<contourFinder.nBlobs; i++){
-			
+
 			if (bDrawOutlines) //Draw contours (outlines) on the source image
 				contourFinder.blobs[i].drawContours(30, 15, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
-			
+
 			if (bShowLabels){ //Show ID label
 				float xpos = contourFinder.blobs[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);
 				float ypos = contourFinder.blobs[i].centroid.y * (MAIN_WINDOW_HEIGHT/camHeight);
@@ -513,35 +513,35 @@ void ofxKCoreVision::drawFingerOutlines(){
 			}
 		}
 	}
-	
+
 	//Find the blobs for drawing
 	if(contourFinder.bTrackFingers){
 		for (int i=0; i<contourFinder.nFingers; i++) {
-			
+
 			if (bDrawOutlines) //Draw contours (outlines) on the source image
 				contourFinder.fingers[i].drawCenter(30, 15, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
-			
+
 			if (bShowLabels){ //Show ID label
 				float xpos = contourFinder.fingers[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);
 				float ypos = contourFinder.fingers[i].centroid.y * (MAIN_WINDOW_HEIGHT/camHeight);
-				
+
 				ofSetColor(200,255,200);
 				char idStr[1024];
-				
+
 				sprintf(idStr, "id: %i", contourFinder.fingers[i].id);
-				
+
 				verdana.drawString(idStr, xpos + 365, ypos + contourFinder.fingers[i].boundingRect.height/2 + 15);
 			}
 		}
 	}
-	
+
 	//Object Drawing
 	if(contourFinder.bTrackObjects){
 		for (int i=0; i<contourFinder.nObjects; i++){
-			
+
 			if (bDrawOutlines) //Draw contours (outlines) on the source image
 				contourFinder.objects[i].drawBox(40, 30, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
-			
+
 			if (bShowLabels){ //Show ID label
 				float xpos = contourFinder.objects[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);
 				float ypos = contourFinder.objects[i].centroid.y * (MAIN_WINDOW_HEIGHT/camHeight);
@@ -645,12 +645,12 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 			}
 			break;
 		case 'x': //Exit Calibrating
-			if (bCalibration){	
+			if (bCalibration){
 				bShowInterface = true;
 				bCalibration = false;
 				calib.calibrating = false;
 				tracker.isCalibrating = false;
-				if (bFullscreen == true) 
+				if (bFullscreen == true)
 					ofToggleFullscreen();
 				bFullscreen = false;
 			}
@@ -671,13 +671,13 @@ void ofxKCoreVision::_keyPressed(ofKeyEventArgs &e)
 		case OF_KEY_UP:
 			farThreshold++;
 			break;
-		case OF_KEY_DOWN:		
+		case OF_KEY_DOWN:
 			farThreshold--;
 			break;
 		case OF_KEY_RIGHT:
 			nearThreshold++;
 			break;
-		case OF_KEY_LEFT:		
+		case OF_KEY_LEFT:
 			nearThreshold--;
 			break;
 		default:
@@ -707,7 +707,7 @@ void ofxKCoreVision::_keyReleased(ofKeyEventArgs &e){
 void ofxKCoreVision::_mouseDragged(ofMouseEventArgs &e){
 	if (showConfiguration)
 		controls->mouseDragged(e.x, e.y, e.button); //guilistener
-	
+
 	if(contourFinder.bTrackObjects){
 		if( e.x > 385 && e.x < 705 && e.y > 30 && e.y < 270 ){
 			if( e.x < rect.x || e.y < rect.y ){
@@ -751,7 +751,7 @@ void ofxKCoreVision::_mouseReleased(ofMouseEventArgs &e)
 {
 	if (showConfiguration)
 		controls->mouseReleased(e.x, e.y, 0); //guilistener
-	
+
 	if( e.x > 385 && e.x < 705 && e.y > 30 && e.y < 270 ){
 		if	( contourFinder.bTrackObjects && isSelecting ){
 			minRect = rect;

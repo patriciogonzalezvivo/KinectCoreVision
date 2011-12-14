@@ -7,3 +7,8 @@ bin/*.app
 bin/.DS_Store
 
 src/.DS_Store
+.DS_Store
+
+bin/.DS_Store
+
+bin/data/.DS_Store

@@ -1,6 +1,6 @@
 /*
 *  ProcessFilters.h
-*  
+*
 *
 *  Created on 2/2/09.
 *  Copyright 2009 NUI Group. All rights reserved.
@@ -36,12 +36,12 @@ class ProcessFilters : public Filters {
         floatBgImg.allocate(camWidth, camHeight);	//ofxShortImage used for simple dynamic background subtraction
 
         //GPU Setup
-		gpuReadBackBuffer = new unsigned char[camWidth*camHeight*3];
-        gpuReadBackImageGS.allocate(camWidth, camHeight);
+//		gpuReadBackBuffer = new unsigned char[camWidth*camHeight*3];
+//      gpuReadBackImageGS.allocate(camWidth, camHeight);
         //allocateGPU();
 		//^^ Commented out for now, till full GPU implementation
     }
-
+/*
     void allocateGPU(){
 
         glGenTextures(1, &gpuSourceTex);
@@ -71,7 +71,7 @@ class ProcessFilters : public Filters {
         copyFilter = new GPUImageFilter("filters/copy.xml", camWidth, camHeight);
         grayScale = new GPUImageFilter("filters/grayScale.xml", camWidth, camHeight);
     }
-
+*/
 /****************************************************************
  *	CPU Filters
  ****************************************************************/
@@ -86,7 +86,7 @@ class ProcessFilters : public Filters {
         if(bDynamicBG){
             floatBgImg.addWeighted( img, fLearnRate);
 			//grayBg = floatBgImg;  // not yet implemented
-			 cvConvertScale( floatBgImg.getCvImage(), grayBg.getCvImage(), 255.0f/65535.0f, 0 );       
+			 cvConvertScale( floatBgImg.getCvImage(), grayBg.getCvImage(), 255.0f/65535.0f, 0 );
 			 grayBg.flagImageChanged();
         }
 
@@ -97,21 +97,21 @@ class ProcessFilters : public Filters {
         if (bLearnBakground == true){
             floatBgImg = img;
 			//grayBg = floatBgImg;  // not yet implemented
-			cvConvertScale( floatBgImg.getCvImage(), grayBg.getCvImage(), 255.0f/65535.0f, 0 );       
+			cvConvertScale( floatBgImg.getCvImage(), grayBg.getCvImage(), 255.0f/65535.0f, 0 );
 			grayBg.flagImageChanged();
             bLearnBakground = false;
         }
 
 		//Background Subtraction
-        //img.absDiff(grayBg, img); 		
+        //img.absDiff(grayBg, img);
 		if(bTrackDark)
 			cvSub(grayBg.getCvImage(), img.getCvImage(), img.getCvImage());
 		else
 			cvSub(img.getCvImage(), grayBg.getCvImage(), img.getCvImage());
 
 		img.flagImageChanged();
-    
-		
+
+
 		if(bSmooth){//Smooth
             img.blur((smooth * 2) + 1); //needs to be an odd number
             if(!bMiniMode)
@@ -140,7 +140,7 @@ class ProcessFilters : public Filters {
 /****************************************************************
  *	GPU Filters
  ****************************************************************/
-    void applyGPUFilters(){
+/*    void applyGPUFilters(){
 
         //recapature the background until image/camera is fully exposed
         if((ofGetElapsedTimeMillis() - exposureStartTime) < CAMERA_EXPOSURE_TIME) bLearnBakground = true;
@@ -189,7 +189,7 @@ class ProcessFilters : public Filters {
         gpuReadBackImageGS.setFromPixels(gpuReadBackBuffer, camWidth, camHeight);
         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
     }
-
+*/
 /****************************************************************
  *	Draw Filter Images
  ****************************************************************/
@@ -201,7 +201,7 @@ class ProcessFilters : public Filters {
         highpassImg.draw(300, 392, 128, 96);
         ampImg.draw(435, 392, 128, 96);
     }
-
+/*
     void drawGPU(){
         drawGLTexture(30, 15, 320, 240, gpuSourceTex);
         drawGLTexture(30, 392, 128, 96, gpuBGTex);
@@ -209,6 +209,6 @@ class ProcessFilters : public Filters {
         subtractFilter2->drawOutputTexture(300, 392, 128, 96);
         threshFilter->drawOutputTexture(435, 392, 128, 96); //this should be amplify filter but we don't have one yet
         gpuReadBackImageGS.draw(375, 15, 320, 240);
-    }
+    }*/
 };
 #endif

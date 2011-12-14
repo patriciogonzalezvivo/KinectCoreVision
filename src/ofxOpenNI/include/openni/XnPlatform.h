@@ -45,20 +45,20 @@
 #define XN_PLATFORM_USE_ARC_VAARGS_STYLE   4
 
 //---------------------------------------------------------------------------
-// Platform Identifier 
+// Platform Identifier
 //---------------------------------------------------------------------------
 
 #if defined(_WIN32) // Microsoft Visual Studio
-	#ifndef RC_INVOKED
-		#if _MSC_VER < 1300 // Before MSVC7 (2003)
-			#error Xiron Platform Abstraction Layer - Win32 - Microsoft Visual Studio versions below 2003 (7.0) are not supported!
-		#endif
-
-		#if _MSC_VER > 1600 // After MSVC8 (2010)
-			#error Xiron Platform Abstraction Layer - Win32 - Microsoft Visual Studio versions above 2010 (10.0) are not supported!
-		#endif
-	#endif
-
+    /*#ifndef __MINGW32_VERSION // MingW32 (added gameover/m gingold 10/07/2011)
+        #ifndef RC_INVOKED
+            #if _MSC_VER < 1300 // Before MSVC7 (2003)
+                #error Xiron Platform Abstraction Layer - Win32 - Microsoft Visual Studio versions below 2003 (7.0) are not supported!
+            #endif
+            #if _MSC_VER > 1600 // After MSVC8 (2010)
+                #error Xiron Platform Abstraction Layer - Win32 - Microsoft Visual Studio versions above 2010 (10.0) are not supported!
+            #endif
+        #endif
+    #endif*/
 	#include "Win32/XnPlatformWin32.h"
 #elif defined(android) && defined(__arm__)
 	#include "Android-Arm/XnPlatformAndroid-Arm.h"

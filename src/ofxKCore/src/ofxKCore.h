@@ -1,14 +1,14 @@
 /***************************************************************************
 *  ofxNCore.h
 *  NUI Group Community Core Vision
-* 
+*
 *  Created by NUI Group Dev Team A on 3/1/09.
-*  Copyright 2009 NUI Group/Inc. All rights reserved.       
+*  Copyright 2009 NUI Group/Inc. All rights reserved.
 *  Version : 1.20
 *
 *
 * Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are 
+* modification, are permitted provided that the following conditions are
 * met:
 * 1. Redistributions of source code must retain the above copyright
 * notice, this list of conditions and the following disclaimer as
@@ -38,11 +38,11 @@
  *  Modify on January 17th of 2011
  *
  *  Kinect Core Vision was made using CommunityCoreVision from NUI Group
- *  was modified by http://www.patriciognzalezvivo.com in order to experiment 
+ *  was modified by http://www.patriciognzalezvivo.com in order to experiment
  *  with kinect posibilities.
  *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are 
+ * modification, are permitted provided that the following conditions are
  * met:
  * 1. Redistributions of source code must retain the above copyright
  * notice, this list of conditions and the following disclaimer as
@@ -74,7 +74,7 @@
 #include "Templates/TemplateUtils.h"
 
 //image filters
-#include "Filters/GPUImageFilter.h"
+//#include "Filters/GPUImageFilter.h"
 #include "Filters/CPUImageFilter.h"
 #include "Filters/ProcessFilters.h"
 

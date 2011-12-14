@@ -65,8 +65,6 @@
 		3D598D33148BCF5C00DA40E9 /* ofxGuiXYPad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D598D04148BCF5C00DA40E9 /* ofxGuiXYPad.cpp */; };
 		3D598D34148BCF5C00DA40E9 /* TouchMessenger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D598D07148BCF5C00DA40E9 /* TouchMessenger.cpp */; };
 		3D598D35148BCF5C00DA40E9 /* CPUImageFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D598D0A148BCF5C00DA40E9 /* CPUImageFilter.cpp */; };
-		3D598D36148BCF5C00DA40E9 /* GPUImageFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D598D0D148BCF5C00DA40E9 /* GPUImageFilter.cpp */; };
-		3D598D37148BCF5C00DA40E9 /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D598D10148BCF5C00DA40E9 /* ShaderProgram.cpp */; };
 		3D598D38148BCF5C00DA40E9 /* ofxKCoreVision.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D598D13148BCF5C00DA40E9 /* ofxKCoreVision.cpp */; };
 		3D598D39148BCF5C00DA40E9 /* TemplateUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D598D17148BCF5C00DA40E9 /* TemplateUtils.cpp */; };
 		3D598D3A148BCF5C00DA40E9 /* BlobManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3D598D1B148BCF5C00DA40E9 /* BlobManager.cpp */; };
@@ -487,11 +485,7 @@
 		3D598D0A148BCF5C00DA40E9 /* CPUImageFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CPUImageFilter.cpp; sourceTree = "<group>"; };
 		3D598D0B148BCF5C00DA40E9 /* CPUImageFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CPUImageFilter.h; sourceTree = "<group>"; };
 		3D598D0C148BCF5C00DA40E9 /* Filters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Filters.h; sourceTree = "<group>"; };
-		3D598D0D148BCF5C00DA40E9 /* GPUImageFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GPUImageFilter.cpp; sourceTree = "<group>"; };
-		3D598D0E148BCF5C00DA40E9 /* GPUImageFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GPUImageFilter.h; sourceTree = "<group>"; };
 		3D598D0F148BCF5C00DA40E9 /* ProcessFilters.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcessFilters.h; sourceTree = "<group>"; };
-		3D598D10148BCF5C00DA40E9 /* ShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
-		3D598D11148BCF5C00DA40E9 /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderProgram.h; sourceTree = "<group>"; };
 		3D598D12148BCF5C00DA40E9 /* ofxKCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxKCore.h; sourceTree = "<group>"; };
 		3D598D13148BCF5C00DA40E9 /* ofxKCoreVision.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxKCoreVision.cpp; sourceTree = "<group>"; };
 		3D598D14148BCF5C00DA40E9 /* ofxKCoreVision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxKCoreVision.h; sourceTree = "<group>"; };
@@ -1443,11 +1437,7 @@
 				3D598D0A148BCF5C00DA40E9 /* CPUImageFilter.cpp */,
 				3D598D0B148BCF5C00DA40E9 /* CPUImageFilter.h */,
 				3D598D0C148BCF5C00DA40E9 /* Filters.h */,
-				3D598D0D148BCF5C00DA40E9 /* GPUImageFilter.cpp */,
-				3D598D0E148BCF5C00DA40E9 /* GPUImageFilter.h */,
 				3D598D0F148BCF5C00DA40E9 /* ProcessFilters.h */,
-				3D598D10148BCF5C00DA40E9 /* ShaderProgram.cpp */,
-				3D598D11148BCF5C00DA40E9 /* ShaderProgram.h */,
 			);
 			path = Filters;
 			sourceTree = "<group>";
@@ -2143,8 +2133,6 @@
 				3D598D33148BCF5C00DA40E9 /* ofxGuiXYPad.cpp in Sources */,
 				3D598D34148BCF5C00DA40E9 /* TouchMessenger.cpp in Sources */,
 				3D598D35148BCF5C00DA40E9 /* CPUImageFilter.cpp in Sources */,
-				3D598D36148BCF5C00DA40E9 /* GPUImageFilter.cpp in Sources */,
-				3D598D37148BCF5C00DA40E9 /* ShaderProgram.cpp in Sources */,
 				3D598D38148BCF5C00DA40E9 /* ofxKCoreVision.cpp in Sources */,
 				3D598D39148BCF5C00DA40E9 /* TemplateUtils.cpp in Sources */,
 				3D598D3A148BCF5C00DA40E9 /* BlobManager.cpp in Sources */,
