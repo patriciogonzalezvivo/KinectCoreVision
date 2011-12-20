@@ -25,9 +25,9 @@
 # edit the following  vars to customize the makefile
 
 include config.make
-include $(OF_ROOT)/libs/openFrameworksCompiled/project/android/paths.make
 
 ifeq ($(findstring Android,$(MAKECMDGOALS)),Android)
+	include $(OF_ROOT)/libs/openFrameworksCompiled/project/android/paths.make
 	ARCH = android
 	ifeq ($(shell uname),Darwin)
 		HOST_PLATFORM = darwin-x86
@@ -64,8 +64,6 @@ else
 	else
 		LIBSPATH =android/armeabi
 	endif
-	#NDK_ROOT = $(shell cat $(OF_ROOT)/libs/openFrameworksCompiled/project/android/ndk_path.make)
-	#SDK_ROOT = $(shell cat $(OF_ROOT)/libs/openFrameworksCompiled/project/android/sdk_path.make)
 	TOOLCHAIN=arm-linux-androideabi-4.4.3
 	TOOLCHAIN_PATH=$(NDK_ROOT)/toolchains/$(TOOLCHAIN)/prebuilt/$(HOST_PLATFORM)/bin/
 	ANDROID_PREFIX=arm-linux-androideabi-
@@ -79,9 +77,10 @@ else
 endif
 
 NODEPS = clean
-SED_EXCLUDE_FROM_SRC = $(shell echo  $(EXCLUDE_FROM_SOURCE) | sed s/\,/\\\\\|/g)
-SOURCE_DIRS = $(shell find . -maxdepth 1 -mindepth 1 -type d | grep -v $(SED_EXCLUDE_FROM_SRC) | sed s/.\\///)
-SOURCES = $(shell find $(SOURCE_DIRS) -name "*.cpp" -or -name "*.c" -or -name "*.cc")
+SED_EXCLUDE_FROM_SRC = $(shell echo  $(EXCLUDE_FROM_SOURCE) | sed "s/,\(.*\)/,\1,/g" | sed "s/\([^,]*\),/ .\/\1%/g") 
+ALL_SOURCES_DIRS = $(shell find . -type d)
+SOURCE_DIRS = $(filter-out $(SED_EXCLUDE_FROM_SRC), $(ALL_SOURCES_DIRS))
+SOURCES = $(shell find $(SOURCE_DIRS) -maxdepth 1 -mindepth 1 -name "*.cpp" -or -name "*.c" -or -name "*.cc")
 OBJFILES = $(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(patsubst %.cc,%.o,$(SOURCES))))
 
 ifneq (,$(USER_SOURCE_DIR))
@@ -116,7 +115,7 @@ else
 endif
 LIB_STATIC = $(shell ls $(OF_ROOT)/libs/*/lib/$(LIBSPATH)/*.a  2> /dev/null | grep -v openFrameworksCompiled | grep -v Poco)
 LIB_SHARED = $(shell ls $(OF_ROOT)/libs/*/lib/$(LIBSPATH)/*.so  2> /dev/null | grep -v openFrameworksCompiled | sed "s/.*\\/lib\([^/]*\)\.so/-l\1/")
-LIB_STATIC += $(OF_ROOT)/libs/poco/lib/$(LIBSPATH)/libPocoNet.a ../../../libs/poco/lib/$(LIBSPATH)/libPocoXML.a ../../../libs/poco/lib/$(LIBSPATH)/libPocoUtil.a ../../../libs/poco/lib/$(LIBSPATH)/libPocoFoundation.a
+LIB_STATIC += $(OF_ROOT)/libs/poco/lib/$(LIBSPATH)/libPocoNet.a $(OF_ROOT)/libs/poco/lib/$(LIBSPATH)/libPocoXML.a $(OF_ROOT)/libs/poco/lib/$(LIBSPATH)/libPocoUtil.a $(OF_ROOT)/libs/poco/lib/$(LIBSPATH)/libPocoFoundation.a
 LIB_PATHS_FLAGS = $(shell ls -d $(OF_ROOT)/libs/*/lib/$(LIBSPATH) | sed "s/\(\.*\)/-L\1/")
 
 CFLAGS += -Wall -fexceptions
@@ -131,8 +130,8 @@ ifeq ($(ARCH),android)
 	SYSTEMLIBS += -lstdc++ -lsupc++ -lgcc -lz -lGLESv1_CM -llog -ldl -lm -lc
 else
 	LDFLAGS = -Wl,-rpath=./libs
-	SYSTEMLIBS += $(shell pkg-config  glew gstreamer-0.10 gstreamer-video-0.10 gstreamer-base-0.10 gstreamer-app-0.10 libudev --libs)
-	SYSTEMLIBS += -lglut -lGL -lasound -lopenal -lsndfile -lvorbis -lFLAC -logg -lfreeimage
+	SYSTEMLIBS += $(shell pkg-config  jack glew gstreamer-0.10 gstreamer-video-0.10 gstreamer-base-0.10 gstreamer-app-0.10 libudev cairo --libs)
+	SYSTEMLIBS += -lglut -lGL -lasound -lopenal -lsndfile -lvorbis -lFLAC -logg -lfreeimage -lGLU
 endif
 
 
@@ -143,34 +142,38 @@ ifeq ($(findstring addons.make,$(wildcard *.make)),addons.make)
 		ADDONS = $(shell cat addons.make)
 	endif
 	
-	ADDONS_REL_DIRS = $(addsuffix /src, $(ADDONS))
-	ADDONS_LIBS_REL_DIRS = $(addsuffix /libs, $(ADDONS))
-	ADDONS_DIRS = $(addprefix $(OF_ROOT)/addons/, $(ADDONS_REL_DIRS) )
-	ADDONS_LIBS_DIRS = $(addprefix $(OF_ROOT)/addons/, $(ADDONS_LIBS_REL_DIRS) )
-	ADDONS_BIN_LIBS_DIRS = $(addsuffix /*/lib/$(LIBSPATH), $(ADDONS_LIBS_DIRS) )
+	ifneq ($(strip $(ADDONS)),)
+	    ADDONS_REL_DIRS = $(addsuffix /src, $(ADDONS))
+	    ADDONS_LIBS_REL_DIRS = $(addsuffix /libs, $(ADDONS))
+	    ADDONS_DIRS = $(addprefix $(OF_ROOT)/addons/, $(ADDONS_REL_DIRS) )
+	    ADDONS_LIBS_DIRS = $(addprefix $(OF_ROOT)/addons/, $(ADDONS_LIBS_REL_DIRS) )
+	    ADDONS_BIN_LIBS_DIRS = $(addsuffix /*/lib/$(LIBSPATH), $(ADDONS_LIBS_DIRS) )
 	
-	ADDONS_INCLUDES = $(ADDONS_DIRS)
-	ADDONS_INCLUDES = $(ADDONS_LIBS_DIRS)
-	ADDONS_INCLUDES += $(shell find $(ADDONS_DIRS) -type d 2> /dev/null)
-	ADDONS_INCLUDES += $(shell find $(ADDONS_LIBS_DIRS) -type d 2> /dev/null)
-	ADDONSCFLAGS = $(addprefix -I,$(ADDONS_INCLUDES))
+	    ADDONS_INCLUDES = $(ADDONS_DIRS)
+	    ADDONS_INCLUDES = $(ADDONS_LIBS_DIRS)
+	    ADDONS_INCLUDES += $(shell find $(ADDONS_DIRS) -type d 2> /dev/null)
+	    ADDONS_INCLUDES += $(shell find $(ADDONS_LIBS_DIRS) -type d 2> /dev/null)
+	    ADDONSCFLAGS = $(addprefix -I,$(ADDONS_INCLUDES))
 
-	ifeq ($(findstring libsorder.make,$(shell find $(ADDONS_BIN_LIBS_DIRS) -name libsorder.make 2> /dev/null)),libsorder.make)
-		ADDONS_LIBS_W_ORDER = $(shell cat $(shell find $(ADDONS_BIN_LIBS_DIRS) -name libsorder.make 2> /dev/null))
+	    ifeq ($(findstring libsorder.make,$(shell find $(ADDONS_BIN_LIBS_DIRS) -name libsorder.make 2> /dev/null)),libsorder.make)
+		    ADDONS_LIBS_W_ORDER = $(shell cat $(shell find $(ADDONS_BIN_LIBS_DIRS) -name libsorder.make 2> /dev/null))
+		    EXCLUDE_LIBS_FILTER = $(addprefix %,$(addsuffix .a,$(ADDONS_LIBS_W_ORDER)))
+		    ADDONS_LIBS_STATICS = $(filter-out $(EXCLUDE_LIBS_FILTER), $(shell find $(ADDONS_BIN_LIBS_DIRS) -name *.a))
+	        ADDONS_LIBS_STATICS += $(addprefix -l, $(ADDONS_LIBS_W_ORDER))
+        	ADDONS_LIBS_STATICS += $(addprefix -L, $(shell find $(ADDONS_BIN_LIBS_DIRS) -name libsorder.make 2> /dev/null | sed s/libsorder.make//g))
+	    else
+		    ADDONS_LIBS_STATICS = $(shell find $(ADDONS_BIN_LIBS_DIRS) -name *.a 2> /dev/null)
+	    endif
+
+	    ADDONS_LIBS_SHARED = $(shell find $(ADDONS_BIN_LIBS_DIRS) -name *.so 2> /dev/null)
+	    ADDONSLIBS = $(ADDONS_LIBS_STATICS)
+	    ADDONSLIBS += $(ADDONS_LIBS_SHARED)
+
+
+	    ADDONS_SOURCES = $(shell find $(ADDONS_DIRS) -name "*.cpp" -or -name "*.c" 2> /dev/null)
+	    ADDONS_SOURCES += $(shell find $(ADDONS_LIBS_DIRS) -name "*.cpp" -or -name "*.c" -or -name "*.cc" 2>/dev/null)
+	    ADDONS_OBJFILES = $(subst $(OF_ROOT)/, ,$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(ADDONS_SOURCES)))))
 	endif
-
-	SED_EXCLUDE_LIBS = $(addsuffix \|,$(ADDONS_LIBS_W_ORDER))
-	ADDONS_LIBS_STATICS = $(shell find $(ADDONS_BIN_LIBS_DIRS) -name *.a 2> /dev/null | grep -v '$(SED_EXCLUDE_LIBS)')
-	ADDONS_LIBS_STATICS += $(addprefix -l, $(ADDONS_LIBS_W_ORDER))
-	ADDONS_LIBS_STATICS += $(addprefix -L, $(shell find $(ADDONS_BIN_LIBS_DIRS) -name libsorder.make 2> /dev/null | sed s/libsorder.make//g))
-	ADDONS_LIBS_SHARED = $(shell find $(ADDONS_BIN_LIBS_DIRS) -name *.so 2> /dev/null)
-	ADDONSLIBS = $(ADDONS_LIBS_STATICS)
-	ADDONSLIBS += $(ADDONS_LIBS_SHARED)
-
-
-	ADDONS_SOURCES = $(shell find $(ADDONS_DIRS) -name "*.cpp" -or -name "*.c" 2> /dev/null)
-	ADDONS_SOURCES += $(shell find $(ADDONS_LIBS_DIRS) -name "*.cpp" -or -name "*.c" -or -name "*.cc" 2>/dev/null)
-	ADDONS_OBJFILES = $(subst $(OF_ROOT)/, ,$(patsubst %.cc,%.o,$(patsubst %.c,%.o,$(patsubst %.cpp,%.o,$(ADDONS_SOURCES)))))
 endif
 
 
@@ -223,6 +226,7 @@ ifeq ($(ARCH),android)
 		LDFLAGS += -Wl,--entry=main,--fix-cortex-a8
 	    BIN_NAME = $(APPNAME)
 	    TARGET = obj/$(BIN_NAME)
+		USER_LIBS = $(USER_LIBS_ARM)
 	endif
 else
 	ifeq ($(findstring Debug,$(MAKECMDGOALS)),Debug)
@@ -245,6 +249,7 @@ endif
 
 ifeq ($(MAKECMDGOALS),clean)
 	TARGET = bin/$(APPNAME)_debug bin/$(APPNAME)
+	TARGET_NAME = Release
 endif
 
 
@@ -270,8 +275,6 @@ Debug: $(TARGET) after
 
 all:
 	$(MAKE) Release
-
-
 
 DebugAndroid: $(TARGET)
 
@@ -340,32 +343,65 @@ $(OBJ_OUTPUT)%.o: $(USER_SOURCE_DIR)/%.cpp
 	mkdir -p $(@D)
 	$(CXX) $(TARGET_CFLAGS) $(CFLAGS) $(ADDONSCFLAGS) $(USER_CFLAGS) -MMD -MP -MF$(OBJ_OUTPUT)$*.d -MT$(OBJ_OUTPUT)$*.d -o$@ -c $<
 	
-$(TARGET): $(OBJS) $(ADDONS_OBJS) $(USER_OBJS) $(TARGET_LIBS) $(LIB_STATIC)
-	@echo 'linking $(TARGET)'
+$(TARGET): $(OBJS) $(ADDONS_OBJS) $(USER_OBJS) $(TARGET_LIBS) $(LIB_STATIC) Makefile
+	@echo 'linking $(TARGET) $(SOURCE_DIRS)'
+	mkdir -p $(@D)
 	$(CXX) -o $@ $(OBJS) $(ADDONS_OBJS) $(USER_OBJS) $(LDFLAGS) $(USER_LDFLAGS) $(TARGET_LIBS) $(ADDONSLIBS) $(USER_LIBS) $(LIB_STATIC) $(LIB_PATHS_FLAGS) $(LIB_SHARED) $(SYSTEMLIBS)
 
 -include $(DEPFILES)
 
 .PHONY: clean cleanDebug cleanRelease CleanAndroid
+clean:
+	rm -rf $(OBJ_OUTPUT)
+	rm -f $(TARGET)
+	rm -r bin/libs
+	
 $(CLEANTARGET):
-	rm -Rf -v $(OBJ_OUTPUT)
-	rm -f -v $(TARGET)
-	rm -Rf -v bin/libs
+	rm -rf $(OBJ_OUTPUT)
+	rm -f $(TARGET)
+	rm -rf bin/libs
 
 CleanAndroid:
 	rm -Rf obj
-	rm -f -v libs/armeabi-v7a/libOFAndroidApp.so
-	rm -f -v libs/armeabi/libOFAndroidApp.so
-	rm -f -v obj/$(APPNAME)
+	rm -f libs/armeabi-v7a/libOFAndroidApp.so
+	rm -f libs/armeabi/libOFAndroidApp.so
+	rm -f obj/$(APPNAME)
 
 
 afterDebugAndroid:$(TARGET)
-	if [ -f libs/armeabi-v7a/libOFAndroidApp.so ]; then rm libs/armeabi-v7a/libOFAndroidApp.so; fi
-	#touch AndroidManifest.xml
+	@if [ -d libs/armeabi-v7a ]; then rm -r libs/armeabi-v7a; fi
+	
+	@cp $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/gdbserver libs/armeabi
+	
+	#create gdb.setup for armeabi
+	@echo "set solib-search-path $(PWD)/obj/local/armeabi:$(PWD)/libs/armeabi" > libs/armeabi/gdb.setup
+	@echo "directory $(NDK_ROOT)/platforms/$(NDK_PLATFORM)/arch-arm/usr/include" >> libs/armeabi/gdb.setup
+	@echo "directory $(PWD)/src" >> libs/armeabi/gdb.setup
+	@echo "directory $(NDK_ROOT)/sources/cxx-stl/system" >> libs/armeabi/gdb.setup
+	@echo "directory $(PWD)/libs/armeabi" >> libs/armeabi/gdb.setup 
+	@echo "" >> libs/armeabi/gdb.setup 
+	
+	@if [ ! -d jni ]; then mkdir jni; fi
+	@echo "APP_ABI := armeabi" > jni/Application.mk
+	@echo "#LOCAL_MODULE := OFAndroidApp" > jni/Android.mk
 
 afterReleaseAndroid:$(TARGET)
-	if [ -f obj/$(BIN_NAME) ]; then rm obj/$(BIN_NAME); fi
-	#touch AndroidManifest.xml
+	@if [ -f obj/$(BIN_NAME) ]; then rm obj/$(BIN_NAME); fi
+	
+	@cp $(OF_ROOT)/libs/openFrameworksCompiled/project/android/libneondetection.so libs/armeabi-v7a/
+	@cp $(NDK_ROOT)/toolchains/arm-linux-androideabi-4.4.3/prebuilt/gdbserver libs/armeabi-v7a
+	
+	#create gdb.setup for armeabi-v7a
+	@echo "set solib-search-path $(PWD)/obj/local/armeabi-v7a:$(PWD)/libs/armeabi-v7a" > libs/armeabi-v7a/gdb.setup
+	@echo "directory $(NDK_ROOT)/platforms/$(NDK_PLATFORM)/arch-arm/usr/include" >> libs/armeabi-v7a/gdb.setup
+	@echo "directory $(PWD)/src" >> libs/armeabi-v7a/gdb.setup
+	@echo "directory $(NDK_ROOT)/sources/cxx-stl/system" >> libs/armeabi-v7a/gdb.setup
+	@echo "directory $(PWD)/libs/armeabi-v7a" >> libs/armeabi-v7a/gdb.setup 
+	@echo "" >> libs/armeabi-v7a/gdb.setup 
+	
+	@if [ ! -d jni ]; then mkdir jni; fi
+	@echo "APP_ABI := armeabi armeabi-v7a" > jni/Application.mk
+	@echo "#LOCAL_MODULE := OFAndroidApp" > jni/Android.mk
 
 RESNAME=$(shell echo $(APPNAME)Resources | tr '[A-Z]' '[a-z]')
 

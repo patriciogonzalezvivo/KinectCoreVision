@@ -31,7 +31,7 @@
 #define MAIN_WINDOW_WIDTH  320.0f
 #define MAIN_WINDOW_HEIGHT 240.0f
 
-class ofxKCoreVision : public ofxGuiListener{  
+class ofxKCoreVision : public ofxGuiListener{
 
 // ofxGUI setup stuff
 enum {
@@ -51,11 +51,11 @@ enum {
 		calibrationPanel_warp,
 
 		sourcePanel,
-		
+
 		TemplatePanel,
 		TemplatePanel_minArea,
 		TemplatePanel_maxArea,
-		
+
 		backgroundPanel,
 		backgroundPanel_remove,
 		backgroundPanel_dynamic,
@@ -109,18 +109,18 @@ public:
 		ofAddListener(ofEvents.update, this, &ofxKCoreVision::_update);
 		ofAddListener(ofEvents.draw, this, &ofxKCoreVision::_draw);
 		ofAddListener(ofEvents.exit, this, &ofxKCoreVision::_exit);
-		
+
 		debugMode = debug;
-		
+
 		//initialize filter
 		filter = NULL;
-		
+
 		//fps and dsp calculation
 		frames		= 0;
 		fps			= 0;
 		lastFPSlog	= 0;
 		differenceTime = 0;
-		
+
 		//bools
 		bCalibration= 0;
 		bFullscreen = 0;
@@ -129,14 +129,14 @@ public:
 		bDrawOutlines = 1;
 		bGPUMode = 0;
 		bTUIOMode = 0;
-		
+
 		showConfiguration = 0;
-		
+
 		//Kinect Camera
 		camRate = 30;
 		camWidth = 320*2;
 		camHeight = 240*2;
-		
+
 		//ints/floats
 		backgroundLearnRate = .01;
 		MIN_BLOB_SIZE = 2;
@@ -200,16 +200,16 @@ public:
 	void saveSettings();
 
 	//Getters
-	std::map<int, Blob> getBlobs();
-	std::map<int, Blob> getFingers();
-	std::map<int, Blob> getObjects();
+	map<int, Blob> getBlobs();
+	map<int, Blob> getFingers();
+	map<int, Blob> getObjects();
 
 	/***************************************************************
 	 *					Kinect Capture Device
 	 ***************************************************************/
 	ofxOpenNIContext	context;
 	ofxDepthGenerator	depth;
-	
+
 	int					nearThreshold;
 	int					farThreshold;
 
@@ -247,13 +247,13 @@ public:
 	int					minTempArea;
 	int					maxTempArea;
 	float				hullPress;
-	
+
 	bool                bStandaloneMode;
-	
+
 	/****************************************************
 	 *End config.xml variables
 	 *****************************************************/
-	
+
 	//Debug mode variables
 	bool				debugMode;
 
@@ -299,7 +299,7 @@ public:
 
 	// The variable which will check the initilisation of camera
 	//to avoid multiple initialisation
-	bool				cameraInited; 
+	bool				cameraInited;
 
 	//Calibration
     Calibration			calib;

@@ -294,19 +294,7 @@
 		<Unit filename="src/ofxKCore/src/Filters/Filters.h">
 			<Option virtualFolder="src/ofxKCore/src/Filters/" />
 		</Unit>
-		<Unit filename="src/ofxKCore/src/Filters/GPUImageFilter.cpp">
-			<Option virtualFolder="src/ofxKCore/src/Filters/" />
-		</Unit>
-		<Unit filename="src/ofxKCore/src/Filters/GPUImageFilter.h">
-			<Option virtualFolder="src/ofxKCore/src/Filters/" />
-		</Unit>
 		<Unit filename="src/ofxKCore/src/Filters/ProcessFilters.h">
-			<Option virtualFolder="src/ofxKCore/src/Filters/" />
-		</Unit>
-		<Unit filename="src/ofxKCore/src/Filters/ShaderProgram.cpp">
-			<Option virtualFolder="src/ofxKCore/src/Filters/" />
-		</Unit>
-		<Unit filename="src/ofxKCore/src/Filters/ShaderProgram.h">
 			<Option virtualFolder="src/ofxKCore/src/Filters/" />
 		</Unit>
 		<Unit filename="src/ofxKCore/src/Templates/Template.h">

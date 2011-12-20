@@ -303,7 +303,8 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 		//Sending TUIO messages
 		if (myTUIO.bOSCMode || myTUIO.bTCPMode || myTUIO.bBinaryMode){
 			myTUIO.setMode(contourFinder.bTrackBlobs, contourFinder.bTrackFingers , contourFinder.bTrackObjects);
-			myTUIO.sendTUIO(&getBlobs(),&getFingers(),&getObjects());
+			myTUIO.sendTUIO( &getBlobs(), &getFingers(), &getObjects() );
+			//myTUIO.sendTUIO(&tracker.getTrackedBlobs(), &tracker.getTrackedFingers(), &tracker.getTrackedObjects() );
 		}
 	}
 }
@@ -764,15 +765,15 @@ void ofxKCoreVision::_mouseReleased(ofMouseEventArgs &e)
 * Getters
 *****************************************************************************/
 
-std::map<int, Blob> ofxKCoreVision::getBlobs(){
+map<int, Blob> ofxKCoreVision::getBlobs(){
 	return tracker.getTrackedBlobs();
 }
 
-std::map<int, Blob> ofxKCoreVision::getFingers(){
+map<int, Blob> ofxKCoreVision::getFingers(){
 	return tracker.getTrackedFingers();
 }
 
-std::map<int,Blob> ofxKCoreVision::getObjects(){
+map<int,Blob> ofxKCoreVision::getObjects(){
 	return tracker.getTrackedObjects();
 }
 

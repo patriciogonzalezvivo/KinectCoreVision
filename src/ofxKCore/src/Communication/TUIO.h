@@ -1,6 +1,6 @@
 /*
 *  TUIO.h
-*  
+*
 *
 *  Created on 2/2/09.
 *  Copyright 2009 NUI Group. All rights reserved.
@@ -15,32 +15,32 @@
 #include "ofxNetwork.h"
 
 class TUIO {
-public:		
+public:
 	TUIO();
 	~TUIO();
-	
+
 	//methods
 	void setup(const char* host, int port, int flashport);
-	void sendTUIO(std::map<int, Blob> * blobBlobs, std::map<int, Blob> * fingerBlobs, std::map<int, Blob> * objectBlobs);
+	void sendTUIO(map<int, Blob> *blobBlobs, map<int, Blob> *fingerBlobs, map<int, Blob> *objectBlobs);
 	void setMode(bool blobs,bool fingers, bool objects);
-	
-	//TCP Network 
+
+	//TCP Network
 	ofxTCPServer 	m_tcpServer;
-	//OSC Network 
-	ofxOscSender	TUIOSocket; 
+	//OSC Network
+	ofxOscSender	TUIOSocket;
 	const char*		localHost;
-	int				TUIOPort;	
+	int				TUIOPort;
 	int				TUIOFlashPort;
 	bool 			bHeightWidth;
 	bool 			bOSCMode;
 	bool			bTCPMode;
 	bool			bBinaryMode;
 	bool			bIsConnected;
-	
+
 	bool			bBlobs;
 	bool			bFingers;
 	bool			bObjects;
-	
+
 private:
 	int				frameseq;
 	bool			send(string message);
