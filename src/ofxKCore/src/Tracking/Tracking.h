@@ -33,6 +33,9 @@ public:
 	std::map<int, Blob> getTrackedBlobs();
 	std::map<int, Blob> getTrackedFingers();
 	std::map<int, Blob> getTrackedObjects();
+    std::map<int, Blob>* getTrackedBlobsPtr();
+	std::map<int, Blob>* getTrackedFingersPtr();
+	std::map<int, Blob>* getTrackedObjectsPtr();
 
 private:
 	int trackKnn(ContourFinder *newBlobs, Blob *track, int k, double thresh, bool fingers);

@@ -90,9 +90,9 @@ int ContourFinder::findContours(	ofxCvGrayscaleImage&  input,
 
 	// put the contours from the linked list, into an array for sorting
 	while( (contour_ptr != NULL) )  {
-		CvBox2D box=cvMinAreaRect2(contour_ptr);
+		CvBox2D box = cvMinAreaRect2(contour_ptr);
 		int objectId; // If the contour is an object, then objectId is its ID
-		objectId=(bTrackObjects)? templates->getTemplateId(box.size.width,box.size.height): -1;
+		objectId = (bTrackObjects)? templates->getTemplateId(box.size.width,box.size.height): -1;
 		
 		if(objectId != -1 ) { //If the blob is a object
 			Blob blob		= Blob();

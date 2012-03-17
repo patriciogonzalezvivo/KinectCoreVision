@@ -23,8 +23,8 @@ class Calibration : public TouchListener {
 
 		Calibration() {
 			TouchEvents.addRAWListener(this);
-            ofAddListener(ofEvents.keyPressed, this, &Calibration::_keyPressed);
-            ofAddListener(ofEvents.keyReleased, this, &Calibration::_keyReleased);
+            ofAddListener(ofEvents().keyPressed, this, &Calibration::_keyPressed);
+            ofAddListener(ofEvents().keyReleased, this, &Calibration::_keyReleased);
 			calibrating = false;
 			bShowTargets = true;
 			bW			= false;

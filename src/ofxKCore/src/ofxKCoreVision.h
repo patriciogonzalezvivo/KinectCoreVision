@@ -21,8 +21,8 @@
 #include "ofxOsc.h"
 #include "ofxXmlSettings.h"
 
-// OpenNI Addon
-#include "ofxOpenNI.h"
+// Kinect
+#include "ofxKinect.h"
 
 // Our Addon
 #include "ofxKCore.h"
@@ -100,15 +100,15 @@ enum {
 public:
 	ofxKCoreVision(bool debug)
 	{
-		ofAddListener(ofEvents.mousePressed, this, &ofxKCoreVision::_mousePressed);
-		ofAddListener(ofEvents.mouseDragged, this, &ofxKCoreVision::_mouseDragged);
-		ofAddListener(ofEvents.mouseReleased, this, &ofxKCoreVision::_mouseReleased);
-		ofAddListener(ofEvents.keyPressed, this, &ofxKCoreVision::_keyPressed);
-		ofAddListener(ofEvents.keyReleased, this, &ofxKCoreVision::_keyReleased);
-		ofAddListener(ofEvents.setup, this, &ofxKCoreVision::_setup);
-		ofAddListener(ofEvents.update, this, &ofxKCoreVision::_update);
-		ofAddListener(ofEvents.draw, this, &ofxKCoreVision::_draw);
-		ofAddListener(ofEvents.exit, this, &ofxKCoreVision::_exit);
+		ofAddListener(ofEvents().mousePressed, this, &ofxKCoreVision::_mousePressed);
+		ofAddListener(ofEvents().mouseDragged, this, &ofxKCoreVision::_mouseDragged);
+		ofAddListener(ofEvents().mouseReleased, this, &ofxKCoreVision::_mouseReleased);
+		ofAddListener(ofEvents().keyPressed, this, &ofxKCoreVision::_keyPressed);
+		ofAddListener(ofEvents().keyReleased, this, &ofxKCoreVision::_keyReleased);
+		ofAddListener(ofEvents().setup, this, &ofxKCoreVision::_setup);
+		ofAddListener(ofEvents().update, this, &ofxKCoreVision::_update);
+		ofAddListener(ofEvents().draw, this, &ofxKCoreVision::_draw);
+		ofAddListener(ofEvents().exit, this, &ofxKCoreVision::_exit);
 
 		debugMode = debug;
 
@@ -160,7 +160,7 @@ public:
 		// AlexP
 		// C++ guarantees that operator delete checks its argument for null-ness
 		delete filter;		filter = NULL;
-		//kinect.close()
+		kinect.close();
 	}
 
 	/****************************************************************
@@ -207,8 +207,7 @@ public:
 	/***************************************************************
 	 *					Kinect Capture Device
 	 ***************************************************************/
-	ofxOpenNIContext	context;
-	ofxDepthGenerator	depth;
+	ofxKinect           kinect;
 
 	int					nearThreshold;
 	int					farThreshold;

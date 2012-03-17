@@ -2,3 +2,4 @@ ofxXmlSettings
 ofxOsc
 ofxNetwork
 ofxOpenCv
+ofxKinect

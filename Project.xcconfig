@@ -5,9 +5,24 @@ OF_PATH = ../../..
 //THIS HAS ALL THE HEADER AND LIBS FOR OF CORE
 #include "../../../libs/openFrameworksCompiled/project/osx/CoreOF.xcconfig"
 
-HEADER_OPENCV = "$(OF_PATH)/addons/ofxOpenCV/libs/opencv/include"
+// path to the addons dir
+ADDONS_PATH = $(OF_PATH)/addons
 
-LIBS_OPENCV = "$(OF_PATH)/addons/ofxOpenCV/libs/opencv/lib/osx/opencv.a"
+//ofxOsc
+OFX_OSC_HEADERS = "$(ADDONS_PATH)/addons/ofxOsc/libs/oscpack/include/ip $(ADDONS_PATH)/ofxOsc/libs/oscpack/include/osc"
+OFX_OSC_LIBS = "$(ADDONS_PATH)/ofxOsc/libs/oscpack/lib/osx/osc.a"
 
-OTHER_LDFLAGS = $(OF_CORE_LIBS) $(LIBS_OPENCV)
-HEADER_SEARCH_PATHS = $(OF_CORE_HEADERS) $(HEADER_OPENCV)
+//ofxOpenCV
+OFX_OPENCV_HEADERS = "$(ADDONS_PATH)/ofxOpenCv/libs/opencv/include/"
+OFX_OPENCV_LIBS = "$(ADDONS_PATH)/ofxOpenCv/libs/opencv/lib/osx/opencv.a"
+
+// ofxKinect
+OFX_KINECT_HEADERS = "$(ADDONS_PATH)/ofxKinect/libs/libusb/osx/include/"
+OFX_KINECT_LIBS = "$(ADDONS_PATH)/ofxKinect/libs/libusb/osx/libs/usb-1.0.a"
+
+// all addons
+OF_ADDON_HEADERS = $(OFX_OSC_HEADERS) $(OFX_KINECT_HEADERS) $(OFX_OPENCV_HEADERS)
+OF_ADDON_LIBS = $(OFX_OSC_LIBS) $(OFX_KINECT_LIBS) $(OFX_OPENCV_LIBS)
+
+HEADER_SEARCH_PATHS = $(OF_CORE_HEADERS) $(OF_ADDON_HEADERS)
+OTHER_LDFLAGS = $(OF_CORE_LIBS) $(OF_ADDON_LIBS)

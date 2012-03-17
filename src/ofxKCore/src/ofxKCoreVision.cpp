@@ -240,12 +240,14 @@ void ofxKCoreVision::initDevice(){
 	//save/update log file
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
 
-	context.setup();
-	depth.setup(&context);
+	kinect.init();
+	//kinect.init(true); // shows infrared instead of RGB video image
+	//kinect.init(false, false); // disable video image (faster fps)
+	kinect.open();
 
 	cameraInited	=	true;
-	camWidth		=	depth.getWidth();
-	camHeight		=	depth.getHeight();
+	camWidth		=	kinect.getWidth();
+	camHeight		=	kinect.getHeight();
 }
 
 /******************************************************************************
@@ -254,8 +256,7 @@ void ofxKCoreVision::initDevice(){
 void ofxKCoreVision::_update(ofEventArgs &e){
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
 
-	context.update();
-	depth.update();
+	kinect.update();
 
 	//bNewFrame = kinect.isFrameNew();
 	bNewFrame = true;	// TODO: look how to this in the correct way;
@@ -303,8 +304,8 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 		//Sending TUIO messages
 		if (myTUIO.bOSCMode || myTUIO.bTCPMode || myTUIO.bBinaryMode){
 			myTUIO.setMode(contourFinder.bTrackBlobs, contourFinder.bTrackFingers , contourFinder.bTrackObjects);
-			myTUIO.sendTUIO( &getBlobs(), &getFingers(), &getObjects() );
-			//myTUIO.sendTUIO(&tracker.getTrackedBlobs(), &tracker.getTrackedFingers(), &tracker.getTrackedObjects() );
+			//myTUIO.sendTUIO( &getBlobs(), &getFingers(), &getObjects() );
+			myTUIO.sendTUIO(tracker.getTrackedBlobsPtr(), tracker.getTrackedFingersPtr(), tracker.getTrackedObjectsPtr() );
 		}
 	}
 }
@@ -314,25 +315,22 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 *				Input Device Stuff
 ************************************************/
 void ofxKCoreVision::getPixels(){
-	xn::DepthGenerator	depth_generator;
-	xn::DepthMetaData	dmd;
+    if(kinect.isFrameNew()) {
+        
+        const float* depthRaw = kinect.getDistancePixels();
+        unsigned char * depthPixels = sourceImg.getPixels();
 
-	depth_generator = depth.getXnDepthGenerator();
-	depth_generator.GetMetaData(dmd);
+        int numPixels = camWidth * camHeight;
 
-	const XnDepthPixel* depthRaw = dmd.Data();
-	unsigned char * depthPixels = sourceImg.getPixels();
-
-	int numPixels = dmd.XRes() * dmd.YRes();
-
-	for(int i = 0; i < numPixels; i++, depthRaw++) {
-		if((*depthRaw <= farThreshold) && (*depthRaw >= nearThreshold))
-			depthPixels[i] = ofMap(*depthRaw, nearThreshold, farThreshold, 255,0);
-		else
-			depthPixels[i] = 0;
-	}
-	sourceImg.flagImageChanged();
-
+        for(int i = 0; i < numPixels; i++, depthRaw++) {
+            if((*depthRaw <= farThreshold) && (*depthRaw >= nearThreshold))
+                depthPixels[i] = ofMap(*depthRaw, nearThreshold, farThreshold, 255,0);
+            else
+                depthPixels[i] = 0;
+        }
+        
+        sourceImg.flagImageChanged();
+    }
 }
 
 //Grab frame from CPU
@@ -759,22 +757,6 @@ void ofxKCoreVision::_mouseReleased(ofMouseEventArgs &e)
 			maxRect = rect;
 		}
 	}
-}
-
-/*****************************************************************************
-* Getters
-*****************************************************************************/
-
-map<int, Blob> ofxKCoreVision::getBlobs(){
-	return tracker.getTrackedBlobs();
-}
-
-map<int, Blob> ofxKCoreVision::getFingers(){
-	return tracker.getTrackedFingers();
-}
-
-map<int,Blob> ofxKCoreVision::getObjects(){
-	return tracker.getTrackedObjects();
 }
 
 /*****************************************************************************
