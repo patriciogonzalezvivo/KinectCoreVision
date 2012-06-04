@@ -1,9 +1,13 @@
+[![kinect](http://patriciogonzalezvivo.com/Btn_grande/14kinectcorevision.jpg)](http://patriciogonzalezvivo.com/kinectcorevision.html)
+
 # MacOSX Pre-Requisit #
 
 Macports is required to be installed. Please check http://www.macports.org/ for its own dependencies and installation procedure. It requires XCode and would need to be installed on your Mac. Then: 
 
 ```sudo port install libtool```
+
 ```sudo port install libusb-devel +universal```
+
 
 # Linux Pre-Requisit #
 
