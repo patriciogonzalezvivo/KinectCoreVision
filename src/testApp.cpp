@@ -4,7 +4,7 @@
 //--------------------------------------------------------------
 void testApp::setup()
 {
-    //ofSetDataPathRoot("data/");
+    ofSetDataPathRoot("data/");
 	ckv = new ofxKCoreVision(debug);
 }
 

@@ -1,5 +1,4 @@
-ofxXmlSettings
-ofxOsc
+ofxKinect
 ofxNetwork
 ofxOpenCv
-ofxKinect
+ofxOsc
