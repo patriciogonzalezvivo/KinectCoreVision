@@ -1,4 +1,7 @@
-#[ Kinect Core Vision ![kinect](http://patriciogonzalezvivo.com/2011/kinectcorevision/thumb.jpg)](http://patriciogonzalezvivo.com/kinectcorevision.html)
+#[ Kinect Core Vision](http://patriciogonzalezvivo.com/kinectcorevision.html)
+[![kinect](http://patriciogonzalezvivo.com/2011/kinectcorevision/thumb.jpg)](http://patriciogonzalezvivo.com/kinectcorevision.html)
+
+
 
 ## Addons needed for compilation
 	
