@@ -20,14 +20,18 @@ public:
 	~TUIO();
 
 	//methods
-	void setup(const char* host, int port, int flashport);
+	//
+    void setup(const char* host, int port, int flashport);
 	void sendTUIO(map<int, Blob> *blobBlobs, map<int, Blob> *fingerBlobs, map<int, Blob> *objectBlobs);
 	void setMode(bool blobs,bool fingers, bool objects);
 
 	//TCP Network
-	ofxTCPServer 	m_tcpServer;
+	//
+    ofxTCPServer 	m_tcpServer;
 	//OSC Network
-	ofxOscSender	TUIOSocket;
+	//
+    ofxOscSender	TUIOSocket;
+    
 	const char*		localHost;
 	int				TUIOPort;
 	int				TUIOFlashPort;
@@ -44,7 +48,7 @@ public:
 private:
 	int				frameseq;
 	bool			send(string message);
-		string			partialPrevMsg;
+    string			partialPrevMsg;
 };
 
 

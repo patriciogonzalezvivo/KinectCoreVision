@@ -16,8 +16,6 @@
 //Addons
 
 #include "ofxOpenCv.h"
-//#include "ofxDirList.h"
-//#include "ofxNetwork.h"
 #include "ofxOsc.h"
 #include "ofxXmlSettings.h"
 
@@ -98,135 +96,218 @@ enum {
 	};
 
 public:
-	ofxKCoreVision(bool debug)
-	{
-		ofAddListener(ofEvents().mousePressed, this, &ofxKCoreVision::_mousePressed);
-		ofAddListener(ofEvents().mouseDragged, this, &ofxKCoreVision::_mouseDragged);
-		ofAddListener(ofEvents().mouseReleased, this, &ofxKCoreVision::_mouseReleased);
-		ofAddListener(ofEvents().keyPressed, this, &ofxKCoreVision::_keyPressed);
-		ofAddListener(ofEvents().keyReleased, this, &ofxKCoreVision::_keyReleased);
-		ofAddListener(ofEvents().setup, this, &ofxKCoreVision::_setup);
-		ofAddListener(ofEvents().update, this, &ofxKCoreVision::_update);
-		ofAddListener(ofEvents().draw, this, &ofxKCoreVision::_draw);
-		ofAddListener(ofEvents().exit, this, &ofxKCoreVision::_exit);
+    
+	ofxKCoreVision(bool debug = true){
+        ofAddListener(ofEvents().mousePressed, this, &ofxKCoreVision::_mousePressed);
+        ofAddListener(ofEvents().mouseDragged, this, &ofxKCoreVision::_mouseDragged);
+        ofAddListener(ofEvents().mouseReleased, this, &ofxKCoreVision::_mouseReleased);
+        ofAddListener(ofEvents().keyPressed, this, &ofxKCoreVision::_keyPressed);
+        ofAddListener(ofEvents().keyReleased, this, &ofxKCoreVision::_keyReleased);
+        ofAddListener(ofEvents().setup, this, &ofxKCoreVision::_setup);
+        ofAddListener(ofEvents().update, this, &ofxKCoreVision::_update);
+        ofAddListener(ofEvents().draw, this, &ofxKCoreVision::_draw);
+        ofAddListener(ofEvents().exit, this, &ofxKCoreVision::_exit);
+        
+        debugMode = debug;
+        
+        //  initialize filter
+        //
+        filter = NULL;
+        
+        //  fps and dsp calculation
+        //
+        frames          = 0;
+        fps             = 0;
+        lastFPSlog      = 0;
+        differenceTime  = 0;
+        
+        //  ints/floats
+        //
+        backgroundLearnRate = .01;
+        MIN_BLOB_SIZE       = 2;
+        MAX_BLOB_SIZE       = 100;
+        hullPress           = 20;
+        pointSelected       = -1;
+        
+        //  Kinect Camera
+        //
+        camWidth            = 640;
+        camHeight           = 480;
+        srcPoints[0] = dstPoints[0] = ofPoint(0,0);
+        srcPoints[1] = dstPoints[1] = ofPoint(camWidth,0);
+        srcPoints[2] = dstPoints[2] = ofPoint(camWidth,camHeight);
+        srcPoints[3] = dstPoints[3] = ofPoint(0,camHeight);
+        
+        //  bools
+        //
+        bCalibration        = 0;
+        bFullscreen         = 0;
+        bShowLabels         = 1;
+        bMiniMode           = 0;
+        bDrawOutlines       = 1;
+        bTUIOMode           = 0;
+        showConfiguration   = 0;
+        
+        contourFinder.bTrackBlobs   =   false;
+        contourFinder.bTrackFingers =   false;
+        contourFinder.bTrackObjects =   false;
+        
+        //  if auto tracker is defined then the tracker automagically comes up
+        //  on startup..
+#ifdef STANDALONE
+        bStandaloneMode = true;
+#else
+        bStandaloneMode = false;
+#endif
+    }
+    
+    ~ofxKCoreVision(){
+        delete filter;
+        filter = NULL;
+        kinect.close();
+    }
+    
+	//  Load/save settings
+    //
+	bool loadXMLSettings();
+	bool saveXMLSettings();
 
-		debugMode = debug;
-
-		//initialize filter
-		filter = NULL;
-
-		//fps and dsp calculation
-		frames		= 0;
-		fps			= 0;
-		lastFPSlog	= 0;
-		differenceTime = 0;
-
-		//bools
-		bCalibration= 0;
-		bFullscreen = 0;
-		bShowLabels = 1;
-		bMiniMode = 0;
-		bDrawOutlines = 1;
-		bGPUMode = 0;
-		bTUIOMode = 0;
-
-		showConfiguration = 0;
-
-		//Kinect Camera
-		camRate = 30;
-		camWidth = 320*2;
-		camHeight = 240*2;
-
-		//ints/floats
-		backgroundLearnRate = .01;
-		MIN_BLOB_SIZE = 2;
-		MAX_BLOB_SIZE = 100;
-		hullPress = 20;
-
-		contourFinder.bTrackBlobs=false;
-		contourFinder.bTrackFingers=false;
-		contourFinder.bTrackObjects=false;
-
-        //if auto tracker is defined then the tracker automagically comes up
-        //on startup..
-        #ifdef STANDALONE
-            bStandaloneMode = true;
-        #else
-            bStandaloneMode = false;
-        #endif
-	}
-
-	~ofxKCoreVision(){
-		// AlexP
-		// C++ guarantees that operator delete checks its argument for null-ness
-		delete filter;		filter = NULL;
-		kinect.close();
-	}
-
-	/****************************************************************
-	 *						Public functions
-	 ****************************************************************/
-	//Basic Events called every frame
-    void _setup(ofEventArgs &e);
-    void _update(ofEventArgs &e);
-	void _draw(ofEventArgs &e);
-    void _exit(ofEventArgs &e);
-    //Mouse Events
-    void _mousePressed(ofMouseEventArgs &e);
-    void _mouseDragged(ofMouseEventArgs &e);
-    void _mouseReleased(ofMouseEventArgs &e);
-    //Key Events
-    void _keyPressed(ofKeyEventArgs &e);
-    void _keyReleased(ofKeyEventArgs &e);
-
-	//GUI
-	void setupControls();
-	void handleGui(int parameterId, int task, void* data, int length);
-	ofxGui*		controls;
-
-	//image processing stuff
-	void initDevice();
-	void getPixels();
-	void grabFrameToCPU();
-	void grabFrameToGPU(GLuint target);
-
-	//drawing
-	void drawFingerOutlines();
-	void drawMiniMode();
-	void drawFullMode();
-
-	//Load/save settings
-	void loadXMLSettings();
-	void saveSettings();
-
-	//Getters
+	//  Getters
+    //
 	map<int, Blob> getBlobs();
 	map<int, Blob> getFingers();
 	map<int, Blob> getObjects();
 
-	/***************************************************************
-	 *					Kinect Capture Device
-	 ***************************************************************/
+private:
+    //  Events
+    //
+    void    _setup(ofEventArgs &e);
+    void    _update(ofEventArgs &e);
+	void    _draw(ofEventArgs &e);
+    void    _exit(ofEventArgs &e);
+    void    _mousePressed(ofMouseEventArgs &e);
+    void    _mouseDragged(ofMouseEventArgs &e);
+    void    _mouseReleased(ofMouseEventArgs &e);
+    void    _keyPressed(ofKeyEventArgs &e);
+    void    _keyReleased(ofKeyEventArgs &e);
+    
+    //  GUI
+    //
+	void    setupControls();
+	void    handleGui(int parameterId, int task, void* data, int length);
+	ofxGui* controls;
+    
+    //  Drawing
+    //
+	void drawOutlines();
+	void drawMiniMode();
+	void drawFullMode();
+    
+    //  Fonts
+    //
+	ofTrueTypeFont		verdana;
+	ofTrueTypeFont      sidebarTXT;
+	ofTrueTypeFont		bigvideo;
+    
+	//  Images
+    //
+	ofImage				background;
+    
+	//  Blob Tracker
+    //
+	BlobTracker			tracker;
+    
+    //  Kinect Device
+    //
 	ofxKinect           kinect;
-
 	int					nearThreshold;
 	int					farThreshold;
 
-	/****************************************************************
-	 *            Variables in config.xml Settings file
-	 *****************************************************************/
+	//  Debug mode variables
+    //
+	bool				debugMode;
+
+	//  FPS variables
+    //
+	int 				frames;
+	int  				fps;
+	float				lastFPSlog;
+	int					differenceTime;
+
+	//  Template Utilities
+    //
+	TemplateUtils		templates;
+
+	//  Template Registration
+    //
+	ofRectangle			rect;
+	ofRectangle			minRect;
+	ofRectangle			maxRect;
+
+	//  Object Selection bools
+    //
+	bool				isSelecting;
+    
+	string				videoFileName;
+
+	int					maxBlobs;
+
+	// The variable which will check the initilisation of camera
+	//to avoid multiple initialisation
+	bool				cameraInited;
+
+	//  Calibration
+    //
+    Calibration			calib;
+
+	//  Blob Finder
+    //
+	ContourFinder		contourFinder;
+
+	//  Image filters
+    //
+	Filters*			filter;
+	CPUImageFilter      processedImg;
+	ofxCvGrayscaleImage	sourceImg;
+
+	//  XML Settings Vars
+    //
+	string				message;
+
+	//  Communication
+    //
+	TUIO				myTUIO;
+	string				tmpLocalHost;
+    int					tmpPort;
+	int					tmpFlashPort;
+
+	//  Logging
+    //
+	char				dateStr [9];
+	char				timeStr [9];
+	time_t				rawtime;
+	struct tm *			timeinfo;
+	char				fileName [80];
+	FILE *				stream ;
+    
+    //  Variables in config.xml Settings file
+	//
+    ofPoint             srcPoints[4];
+    ofPoint             dstPoints[4];
+    int                 pointSelected;
+	float				backgroundLearnRate;
+    float				hullPress;          //  For finger detection
 	int 				frameseq;
 	int 				threshold;
 	int					wobbleThreshold;
-	int 				camRate;
 	int 				camWidth;
 	int 				camHeight;
 	int					winWidth;
 	int					winHeight;
 	int					MIN_BLOB_SIZE;
 	int					MAX_BLOB_SIZE;
-	float				backgroundLearnRate;
-
+	int					minTempArea;        //  Area Slider
+	int					maxTempArea;        //  Area Slider
 	bool				showConfiguration;
 	bool  				bMiniMode;
 	bool				bShowInterface;
@@ -237,96 +318,7 @@ public:
 	bool 				bCalibration;
 	bool				bShowLabels;
 	bool				bNewFrame;
-	//filters
-	bool				bAutoBackground;
-	//modes
-	bool				bGPUMode;
-
-	//Area slider variables
-	int					minTempArea;
-	int					maxTempArea;
-	float				hullPress;
-
+	bool				bAutoBackground;    //  Filters
 	bool                bStandaloneMode;
-
-	/****************************************************
-	 *End config.xml variables
-	 *****************************************************/
-
-	//Debug mode variables
-	bool				debugMode;
-
-	//Undistortion of Image - Required for some setups
-	bool				bUndistort;
-	ofxCvGrayscaleImage	undistortedImg;
-
-	//FPS variables
-	int 				frames;
-	int  				fps;
-	float				lastFPSlog;
-	int					differenceTime;
-
-	//Fonts
-	ofTrueTypeFont		verdana;
-	ofTrueTypeFont      sidebarTXT;
-	ofTrueTypeFont		bigvideo;
-
-	//Images
-	ofImage				background;
-
-	//Blob Tracker
-	BlobTracker			tracker;
-
-	//Template Utilities
-	TemplateUtils		templates;
-
-	//Template Registration
-	ofRectangle			rect;
-	ofRectangle			minRect;
-	ofRectangle			maxRect;
-
-	//Object Selection bools
-	bool				isSelecting;
-
-	//Area sliders
-    /****************************************************************
-	 *						Private Stuff
-	 ****************************************************************/
-	string				videoFileName;
-
-	int					maxBlobs;
-
-	// The variable which will check the initilisation of camera
-	//to avoid multiple initialisation
-	bool				cameraInited;
-
-	//Calibration
-    Calibration			calib;
-
-	//Blob Finder
-	ContourFinder		contourFinder;
-
-	//Image filters
-	Filters*			filter;
-	CPUImageFilter      processedImg;
-	ofxCvGrayscaleImage	sourceImg;
-
-	//XML Settings Vars
-	ofxXmlSettings		XML;
-	string				message;
-
-	//Communication
-	TUIO				myTUIO;
-	string				tmpLocalHost;
-    int					tmpPort;
-	int					tmpFlashPort;
-
-	//Logging
-	char				dateStr [9];
-	char				timeStr [9];
-	time_t				rawtime;
-	struct tm *			timeinfo;
-	char				fileName [80];
-	FILE *				stream ;
 };
 #endif

@@ -11,16 +11,18 @@
 #include "ofxKCoreVision.h"
 #include "Controls/gui.h"
 
+
+
 /******************************************************************************
 * The setup function is run once to perform initializations in the application
 *****************************************************************************/
 void ofxKCoreVision::_setup(ofEventArgs &e){
-	threshold = 80;
-	nearThreshold = 550;
-	farThreshold  = 650;
-
+	threshold       = 80;
+	nearThreshold   = 550;
+	farThreshold    = 650;
+    
 	//set the title
-	ofSetWindowTitle("Kinect Vision based on CCV v2");
+	ofSetWindowTitle("Kinect Vision based on CCV v2.1");
 
 	//create filter
 	if(filter == NULL)
@@ -44,73 +46,70 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 		/******************************************************************************************************/
 	}
 
-	cameraInited = false;
-
-	//Setup Window Properties
+	//  Setup Window Properties
+    //
 	ofSetWindowShape(winWidth,winHeight);
 	ofSetVerticalSync(false);	            //Set vertical sync to false for better performance?
 
-	//load camera/video
-	initDevice();
-	printf("Kinect Initialised...\n");
+	//  Init Kinect Sensor Device
+    //
+	//  save/update log file
+	if(debugMode) if( (stream = freopen(fileName, "a", stdout) ) == NULL){}
+    cameraInited = false;
+	if ( kinect.init(false,false,false) ){
+        cameraInited    =   kinect.open();
+        camWidth		=	kinect.getWidth();
+        camHeight		=	kinect.getHeight();
+        int camRate     =   30;
+        
+        ofSetFrameRate(camRate * 1.3);			//  This will be based on camera fps in the future
+        printf("Kinect Initialised...\n");
+    }
 
-	//set framerate
-	ofSetFrameRate(camRate * 1.3);			//This will be based on camera fps in the future
+	//  Allocate images (needed for drawing/processing images)
+    //
+	processedImg.allocate(camWidth, camHeight); //  main Image that'll be processed.
+	processedImg.setUseTexture(false);			//  We don't need to draw this so don't create a texture
+	sourceImg.allocate(camWidth, camHeight);    //  Source Image
+	sourceImg.setUseTexture(false);				//  We don't need to draw this so don't create a texture
 
-	/*****************************************************************************************************
-	* Allocate images (needed for drawing/processing images)
-	******************************************************************************************************/
-	processedImg.allocate(camWidth, camHeight); //main Image that'll be processed.
-	processedImg.setUseTexture(false);			//We don't need to draw this so don't create a texture
-	sourceImg.allocate(camWidth, camHeight);    //Source Image
-	sourceImg.setUseTexture(false);				//We don't need to draw this so don't create a texture
-
-	//Fiducial Images
-	undistortedImg.allocate(camWidth, camHeight);		// ES NECESARIO???
-	/******************************************************************************************************/
-
-	//Fonts - Is there a way to dynamically change font size?
-	verdana.loadFont("verdana.ttf", 8, true, true);	   //Font used for small images
-
-	//Static Images
-	background.loadImage("images/background.jpg"); //Main (Temp?) Background
-	//GUI Controls
+	//  GUI Stuff
+    //
+	verdana.loadFont("verdana.ttf", 8, true, true);
+	background.loadImage("images/background.jpg");
 	controls = ofxGui::Instance(this);
 	setupControls();
 
-	//printf("Controls Loaded...\n");
-
-	//Setup Calibration
+	//  Setup Calibration
+    //
 	calib.setup(camWidth, camHeight, &tracker);
 
-	//Allocate Filters
+	//  Allocate Filters
+    //
 	filter->allocate( camWidth, camHeight );
 
 	/*****************************************************************************************************
 	* Startup Modes
 	******************************************************************************************************/
+    
 	//If Standalone Mode (not an addon)
-	if (bStandaloneMode)
-	{
+	if (bStandaloneMode){
 		printf("Starting in standalone mode...\n\n");
 		showConfiguration = true;
 	}
-	if (bMiniMode)
-	{
+	if (bMiniMode) {
 		showConfiguration = true;
 		bShowInterface = false;
 		printf("Starting in Mini Mode...\n\n");
 		ofSetWindowShape(190, 200); //minimized size
 		filter->bMiniMode = bMiniMode;
-	}
-	else{
+	} else {
 		bShowInterface = true;
 		printf("Starting in full mode...\n\n");
 	}
 
 	//If Object tracking activated
-	if(contourFinder.bTrackObjects)
-	{
+	if(contourFinder.bTrackObjects) {
 		templates.loadTemplateXml();
 	}
 
@@ -122,84 +121,113 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 /****************************************************************
 *	Load/Save config.xml file Settings
 ****************************************************************/
-void ofxKCoreVision::loadXMLSettings()
-{
-	// TODO: a seperate XML to map keyboard commands to action
+bool ofxKCoreVision::loadXMLSettings(){
 	message = "Loading config.xml...";
-	// Can this load via http?
-	if ( XML.loadFile("config.xml"))
-		message = "Settings Loaded!\n\n";
-	else
+    
+    ofxXmlSettings		XML;
+    if ( XML.loadFile("config.xml") ){
+        if ( XML.pushTag("CONFIG") ){
+            
+            winWidth					= XML.getValue("WINDOW:WIDTH", 950);
+            winHeight					= XML.getValue("WINDOW:HEIGHT", 600);
+            
+            nearThreshold				= XML.getValue("KINECT:NEAR",600);
+            farThreshold				= XML.getValue("KINECT:FAR",700);
+        
+            XML.pushTag("WARP");
+            for(int i = 0; i < 4; i++){
+                XML.pushTag("POINT",i);
+                srcPoints[i].x = XML.getValue("X", 0.0);
+                srcPoints[i].y = XML.getValue("Y", 0.0);
+                XML.popTag();
+            }
+            XML.popTag();
+            
+            maxBlobs					= XML.getValue("BLOBS:MAXNUMBER", 20);
+            
+            
+            backgroundLearnRate			= XML.getValue("INT:BGLEARNRATE", 0.01f);
+            
+            bMiniMode                   = XML.getValue("BOOLEAN:MINIMODE",0);
+            
+            bShowLabels					= XML.getValue("BOOLEAN:LABELS",0);
+            bDrawOutlines				= XML.getValue("BOOLEAN:OUTLINES",0);
+            
+            //  Pre-Filter
+            //
+            filter->bLearnBakground		= XML.getValue("BOOLEAN:LEARNBG",0);
+            filter->bVerticalMirror		= XML.getValue("BOOLEAN:VMIRROR",0);
+            filter->bHorizontalMirror	= XML.getValue("BOOLEAN:HMIRROR",0);
+            
+            //  Filters
+            //
+            filter->bTrackDark			= XML.getValue("BOOLEAN:TRACKDARK", 0);
+            filter->bHighpass			= XML.getValue("BOOLEAN:HIGHPASS",1);
+            filter->bAmplify			= XML.getValue("BOOLEAN:AMPLIFY", 1);
+            filter->bSmooth				= XML.getValue("BOOLEAN:SMOOTH", 1);
+            filter->bDynamicBG			= XML.getValue("BOOLEAN:DYNAMICBG", 1);
+            
+            //  Filter Settings
+            //
+            filter->threshold			= XML.getValue("INT:THRESHOLD",0);
+            filter->highpassBlur		= XML.getValue("INT:HIGHPASSBLUR",0);
+            filter->highpassNoise		= XML.getValue("INT:HIGHPASSNOISE",0);
+            filter->highpassAmp			= XML.getValue("INT:HIGHPASSAMP",0);
+            filter->smooth				= XML.getValue("INT:SMOOTH",0);
+            
+            //  CounterFinder
+            //
+            minTempArea					= XML.getValue("INT:MINTEMPAREA",0);
+            maxTempArea					= XML.getValue("INT:MAXTEMPAREA",0);
+            MIN_BLOB_SIZE				= XML.getValue("INT:MINBLOBSIZE",2);
+            MAX_BLOB_SIZE				= XML.getValue("INT:MAXBLOBSIZE",100);
+            hullPress					= XML.getValue("INT:HULLPRESS",20.0);
+            tracker.MOVEMENT_FILTERING	= XML.getValue("INT:MINMOVEMENT",0);
+            
+            //  Tracking Options
+            //
+            contourFinder.bTrackBlobs	= XML.getValue("BOOLEAN:TRACKBLOBS",0);
+            contourFinder.bTrackFingers	= XML.getValue("BOOLEAN:TRACKFINGERS",0);
+            contourFinder.bTrackObjects	= XML.getValue("BOOLEAN:TRACKOBJECTS",0);
+            
+            //  NETWORK SETTINGS
+            //
+            bTUIOMode					= XML.getValue("BOOLEAN:TUIO",0);
+            myTUIO.bOSCMode				= XML.getValue("BOOLEAN:OSCMODE",1);
+            myTUIO.bTCPMode				= XML.getValue("BOOLEAN:TCPMODE",1);
+            myTUIO.bBinaryMode			= XML.getValue("BOOLEAN:BINMODE",1);
+            myTUIO.bHeightWidth			= XML.getValue("BOOLEAN:HEIGHTWIDTH",0);
+            tmpLocalHost				= XML.getValue("NETWORK:LOCALHOST", "localhost");
+            tmpPort						= XML.getValue("NETWORK:TUIOPORT_OUT", 3333);
+            tmpFlashPort				= XML.getValue("NETWORK:TUIOFLASHPORT_OUT", 3000);
+            
+            XML.popTag();
+            
+            myTUIO.setup(tmpLocalHost.c_str(), tmpPort, tmpFlashPort); //have to convert tmpLocalHost to a const char*
+            message = "Settings Loaded!\n\n";
+            return true;
+        } else {
+            message = "The settings file was empty!\n\n";
+            return false;
+        }
+		
+	} else {
 		message = "No Settings Found...\n\n"; //FAIL
-
-	//--------------------------------------------------------------
-	//  START BINDING XML TO VARS
-	//--------------------------------------------------------------
-	winWidth					= XML.getValue("CONFIG:WINDOW:WIDTH", 950);
-	winHeight					= XML.getValue("CONFIG:WINDOW:HEIGHT", 600);
-	maxBlobs					= XML.getValue("CONFIG:BLOBS:MAXNUMBER", 20);
-	bShowLabels					= XML.getValue("CONFIG:BOOLEAN:LABELS",0);
-	bDrawOutlines				= XML.getValue("CONFIG:BOOLEAN:OUTLINES",0);
-	bUndistort					= XML.getValue("CONFIG:BOOLEAN:UNDISTORT", 0);
-	filter->bLearnBakground		= XML.getValue("CONFIG:BOOLEAN:LEARNBG",0);
-	filter->bVerticalMirror		= XML.getValue("CONFIG:BOOLEAN:VMIRROR",0);
-	filter->bHorizontalMirror	= XML.getValue("CONFIG:BOOLEAN:HMIRROR",0);
-
-	nearThreshold				= XML.getValue("CONFIG:KINECT:NEAR",600);
-	farThreshold				= XML.getValue("CONFIG:KINECT:FAR",700);
-
-	//Filters
-	filter->bTrackDark			= XML.getValue("CONFIG:BOOLEAN:TRACKDARK", 0);
-	filter->bHighpass			= XML.getValue("CONFIG:BOOLEAN:HIGHPASS",1);
-	filter->bAmplify			= XML.getValue("CONFIG:BOOLEAN:AMPLIFY", 1);
-	filter->bSmooth				= XML.getValue("CONFIG:BOOLEAN:SMOOTH", 1);
-	filter->bDynamicBG			= XML.getValue("CONFIG:BOOLEAN:DYNAMICBG", 1);
-	//MODES
-	bGPUMode					= XML.getValue("CONFIG:BOOLEAN:GPU", 0);
-	bMiniMode                   = XML.getValue("CONFIG:BOOLEAN:MINIMODE",0);
-	//CONTROLS
-	tracker.MOVEMENT_FILTERING	= XML.getValue("CONFIG:INT:MINMOVEMENT",0);
-	MIN_BLOB_SIZE				= XML.getValue("CONFIG:INT:MINBLOBSIZE",2);
-	MAX_BLOB_SIZE				= XML.getValue("CONFIG:INT:MAXBLOBSIZE",100);
-	backgroundLearnRate			= XML.getValue("CONFIG:INT:BGLEARNRATE", 0.01f);
-
-	//Filter Settings
-	filter->threshold			= XML.getValue("CONFIG:INT:THRESHOLD",0);
-	filter->highpassBlur		= XML.getValue("CONFIG:INT:HIGHPASSBLUR",0);
-	filter->highpassNoise		= XML.getValue("CONFIG:INT:HIGHPASSNOISE",0);
-	filter->highpassAmp			= XML.getValue("CONFIG:INT:HIGHPASSAMP",0);
-	filter->smooth				= XML.getValue("CONFIG:INT:SMOOTH",0);
-	minTempArea					= XML.getValue("CONFIG:INT:MINTEMPAREA",0);
-	maxTempArea					= XML.getValue("CONFIG:INT:MAXTEMPAREA",0);
-	hullPress					= XML.getValue("CONFIG:INT:HULLPRESS",20.0);
-
-	//Tracking Options
-	contourFinder.bTrackBlobs	= XML.getValue("CONFIG:BOOLEAN:TRACKBLOBS",0);
-	contourFinder.bTrackFingers	= XML.getValue("CONFIG:BOOLEAN:TRACKFINGERS",0);
-	contourFinder.bTrackObjects	= XML.getValue("CONFIG:BOOLEAN:TRACKOBJECTS",0);
-
-	//NETWORK SETTINGS
-	bTUIOMode					= XML.getValue("CONFIG:BOOLEAN:TUIO",0);
-	myTUIO.bOSCMode				= XML.getValue("CONFIG:BOOLEAN:OSCMODE",1);
-	myTUIO.bTCPMode				= XML.getValue("CONFIG:BOOLEAN:TCPMODE",1);
-	myTUIO.bBinaryMode			= XML.getValue("CONFIG:BOOLEAN:BINMODE",1);
-	myTUIO.bHeightWidth			= XML.getValue("CONFIG:BOOLEAN:HEIGHTWIDTH",0);
-	tmpLocalHost				= XML.getValue("CONFIG:NETWORK:LOCALHOST", "localhost");
-	tmpPort						= XML.getValue("CONFIG:NETWORK:TUIOPORT_OUT", 3333);
-	tmpFlashPort				= XML.getValue("CONFIG:NETWORK:TUIOFLASHPORT_OUT", 3000);
-	myTUIO.setup(tmpLocalHost.c_str(), tmpPort, tmpFlashPort); //have to convert tmpLocalHost to a const char*
-	//--------------------------------------------------------------
-	//  END XML SETUP
+        return false;
+    }
 }
 
-void ofxKCoreVision::saveSettings(){
+bool ofxKCoreVision::saveXMLSettings(){
+    ofxXmlSettings		XML;
+    
+    XML.loadFile("config.xml");
+    
 	XML.setValue("CONFIG:KINECT:NEAR", nearThreshold);
 	XML.setValue("CONFIG:KINECT:FAR", farThreshold);
 
 	XML.setValue("CONFIG:BOOLEAN:PRESSURE",bShowPressure);
 	XML.setValue("CONFIG:BOOLEAN:LABELS",bShowLabels);
 	XML.setValue("CONFIG:BOOLEAN:OUTLINES",bDrawOutlines);
-	XML.setValue("CONFIG:BOOLEAN:UNDISTORT",bUndistort);
 	XML.setValue("CONFIG:BOOLEAN:LEARNBG", filter->bLearnBakground);
 	XML.setValue("CONFIG:BOOLEAN:VMIRROR", filter->bVerticalMirror);
 	XML.setValue("CONFIG:BOOLEAN:HMIRROR", filter->bHorizontalMirror);
@@ -229,25 +257,17 @@ void ofxKCoreVision::saveSettings(){
 	XML.setValue("CONFIG:BOOLEAN:OSCMODE", myTUIO.bOSCMode);
 	XML.setValue("CONFIG:BOOLEAN:TCPMODE", myTUIO.bTCPMode);
 	XML.setValue("CONFIG:BOOLEAN:BINMODE", myTUIO.bBinaryMode);
-	XML.saveFile("config.xml");
-}
-
-/************************************************
-*				Init Device
-************************************************/
-//Init Device (Kinect)
-void ofxKCoreVision::initDevice(){
-	//save/update log file
-	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
-
-	kinect.init();
-	//kinect.init(true); // shows infrared instead of RGB video image
-	//kinect.init(false, false); // disable video image (faster fps)
-	kinect.open();
-
-	cameraInited	=	true;
-	camWidth		=	kinect.getWidth();
-	camHeight		=	kinect.getHeight();
+    
+    XML.pushTag("CONFIG");
+    XML.pushTag("WARP");
+    for(int i = 0 ; i < 4; i++){
+        XML.setValue("POINT:X", srcPoints[i].x,i);
+        XML.setValue("POINT:Y", srcPoints[i].y,i);
+    }
+    XML.popTag();
+    XML.popTag();
+    
+    return XML.saveFile("config.xml");
 }
 
 /******************************************************************************
@@ -256,127 +276,140 @@ void ofxKCoreVision::initDevice(){
 void ofxKCoreVision::_update(ofEventArgs &e){
 	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
 
-	kinect.update();
-
-	//bNewFrame = kinect.isFrameNew();
-	bNewFrame = true;	// TODO: look how to this in the correct way;
-
+    //  Dragable Warp points
+    //
+    if ( !bCalibration && !bMiniMode && bShowInterface && ofGetMousePressed() ){
+        ofPoint mouse = ofPoint(ofGetMouseX(),ofGetMouseY());
+        mouse -= ofPoint(30, 15);   //  Translate
+        mouse *= 2.0;               //  Scale
+        
+        if ( pointSelected == -1 ){
+            for(int i = 0; i < 4; i++){
+                if ( srcPoints[i].distance(mouse) < 20){
+                    srcPoints[i].x = mouse.x;
+                    srcPoints[i].y = mouse.y;
+                    pointSelected = i;
+                    break;
+                }
+            }
+        } else {
+            if (mouse.x < 0)
+                mouse.x = 0;
+            
+            if (mouse.x > camWidth)
+                mouse.x = camWidth;
+            
+            if (mouse.y < 0)
+                mouse.y = 0;
+            
+            if (mouse.y > camHeight)
+                mouse.y = camHeight;
+            
+            srcPoints[pointSelected].x = mouse.x;
+            srcPoints[pointSelected].y = mouse.y;
+        }
+    } else {
+        pointSelected = -1;
+    }
+    
+    kinect.update();
+	bNewFrame = true;
 	if(!bNewFrame){
 		return;			//if no new frame, return
 	} else {			//else process camera frame
 		ofBackground(0, 0, 0);
 
 		// Calculate FPS of Camera
+        //
 		frames++;
 		float time = ofGetElapsedTimeMillis();
 		if (time > (lastFPSlog + 1000)) {
 			fps = frames;
 			frames = 0;
 			lastFPSlog = time;
-		}//End calculation
+		}
+        // End calculation
 
 		float beforeTime = ofGetElapsedTimeMillis();
 
-	//	if (bGPUMode){
-	//		grabFrameToGPU(filter->gpuSourceTex);
-	//		filter->applyGPUFilters();
-	//		contourFinder.findContours(filter->gpuReadBackImageGS,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress , false);
-	//	} else {
-			grabFrameToCPU();
-			filter->applyCPUFilters( processedImg );
-			contourFinder.findContours(processedImg,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress, false);
-	//	}
+        //  Get Pixels from the Kinect
+        //
+        if(kinect.isFrameNew()) {
+            
+            const float* depthRaw = kinect.getDistancePixels();
+            unsigned char * depthPixels = sourceImg.getPixels();
+            
+            int numPixels = camWidth * camHeight;
+            
+            for(int i = 0; i < numPixels; i++, depthRaw++) {
+                if((*depthRaw <= farThreshold) && (*depthRaw >= nearThreshold))
+                    depthPixels[i] = ofMap(*depthRaw, nearThreshold, farThreshold, 255,0);
+                else
+                    depthPixels[i] = 0;
+            }
+            
+            sourceImg.flagImageChanged();
+        }
+        
+        //  Mirror if necesary
+        //
+        if (filter->bVerticalMirror || filter->bHorizontalMirror){
+            sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
+        }
+        
+        //  TODO: this need to be done only when it's necesary
+        //
+        processedImg.warpIntoMe(sourceImg, srcPoints, dstPoints);   //  processedImg = sourceImg;
+        
+        //  Filter and Process
+        //
+        filter->applyFilters( processedImg );
+        contourFinder.findContours(processedImg,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress, false);
 
-		//If Object tracking or Finger tracking is enabled
-		if( contourFinder.bTrackBlobs || contourFinder.bTrackFingers || contourFinder.bTrackObjects)
+		//  If Object tracking or Finger tracking is enabled
+		//
+        if( contourFinder.bTrackBlobs || contourFinder.bTrackFingers || contourFinder.bTrackObjects){
 			tracker.track(&contourFinder);
-
-		//get DSP time
-		differenceTime = ofGetElapsedTimeMillis() - beforeTime;
-
-		//Dynamic Background subtraction LearRate
-			if (filter->bDynamicBG){
-			filter->fLearnRate = backgroundLearnRate * .0001; //If there are no blobs, add the background faster.
-			if ((contourFinder.nBlobs > 0 )|| (contourFinder.nFingers > 0 ) ) //If there ARE blobs, add the background slower.
+        }
+        
+        //  Get DSP time
+        //
+        differenceTime = ofGetElapsedTimeMillis() - beforeTime;
+        
+        //Dynamic Background subtraction LearRate
+        //
+        if (filter->bDynamicBG){
+            filter->fLearnRate = backgroundLearnRate * .0001; //If there are no blobs, add the background faster.
+			
+            if ((contourFinder.nBlobs > 0 )|| (contourFinder.nFingers > 0 ) ) //If there ARE blobs, add the background slower.
 				filter->fLearnRate = backgroundLearnRate * .0001;
-		}//End Background Learning rate
-
+        }
+        
 		//Sending TUIO messages
+        //
 		if (myTUIO.bOSCMode || myTUIO.bTCPMode || myTUIO.bBinaryMode){
 			myTUIO.setMode(contourFinder.bTrackBlobs, contourFinder.bTrackFingers , contourFinder.bTrackObjects);
-			//myTUIO.sendTUIO( &getBlobs(), &getFingers(), &getObjects() );
 			myTUIO.sendTUIO(tracker.getTrackedBlobsPtr(), tracker.getTrackedFingersPtr(), tracker.getTrackedObjectsPtr() );
 		}
 	}
 }
 
-
-/************************************************
-*				Input Device Stuff
-************************************************/
-void ofxKCoreVision::getPixels(){
-    if(kinect.isFrameNew()) {
-        
-        const float* depthRaw = kinect.getDistancePixels();
-        unsigned char * depthPixels = sourceImg.getPixels();
-
-        int numPixels = camWidth * camHeight;
-
-        for(int i = 0; i < numPixels; i++, depthRaw++) {
-            if((*depthRaw <= farThreshold) && (*depthRaw >= nearThreshold))
-                depthPixels[i] = ofMap(*depthRaw, nearThreshold, farThreshold, 255,0);
-            else
-                depthPixels[i] = 0;
-        }
-        
-        sourceImg.flagImageChanged();
-    }
-}
-
-//Grab frame from CPU
-void ofxKCoreVision::grabFrameToCPU(){
-	getPixels();
-	processedImg = sourceImg;
-	sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
-}
-
-//Grab frame from GPU
-void ofxKCoreVision::grabFrameToGPU(GLuint target){
-	//grab the frame to a raw openGL texture
-	getPixels();
-
-	glEnable(GL_TEXTURE_2D);
-	//glPixelStorei(1);
-	glBindTexture(GL_TEXTURE_2D, target);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, camWidth, camHeight, GL_RGB, GL_UNSIGNED_BYTE, sourceImg.getPixels());
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glBindTexture(GL_TEXTURE_2D,0);
-}
-
-
-/******************************************************************************
-* The draw function paints the textures onto the screen. It runs after update.
-*****************************************************************************/
-void ofxKCoreVision::_draw(ofEventArgs &e)
-{
+void ofxKCoreVision::_draw(ofEventArgs &e){
 	if (showConfiguration){
-		//if calibration
+
+        //  Check the mode
+        //
 		if (bCalibration){
-			//Don't draw main interface
+			//  Don't draw main interface
 			calib.passInContourFinder(contourFinder.nBlobs, contourFinder.blobs);
 			calib.doCalibration();
-		}
-		//if mini mode
-		else if (bMiniMode){
+		} else if (bMiniMode){
 			drawMiniMode();
-		}
-		//if full mode
-		else if (bShowInterface){
+		} else if (bShowInterface){
 			drawFullMode();
 
 			if(bDrawOutlines || bShowLabels)
-				drawFingerOutlines();
+				drawOutlines();
 
 			if(contourFinder.bTrackObjects && isSelecting){
 				ofNoFill();
@@ -389,7 +422,8 @@ void ofxKCoreVision::_draw(ofEventArgs &e)
 			}
 		}
 
-		//draw gui controls
+		//  Draw gui controls
+        //
 		if (!bCalibration && !bMiniMode)
 			controls->draw();
 	}
@@ -397,66 +431,78 @@ void ofxKCoreVision::_draw(ofEventArgs &e)
 
 void ofxKCoreVision::drawFullMode(){
 	ofSetColor(255);
-	//Draw Background Image
+    
+	//  Draw Background Image
+    //
 	background.draw(0,0);
 
-	//Draw Image Filters To Screen
-//	if (bGPUMode)
-//		filter->drawGPU();
-//	else {
-		sourceImg.draw(30, 15, 320, 240);
-		filter->draw();
-//	}
+    //  Draw Source
+    //
+    sourceImg.draw(30, 15, 320, 240);
+    filter->draw();
 
-	ofSetColor(255);
-
+    //  Draw Warp Area
+    //
+    ofPushStyle();
+    ofPushMatrix();
+    ofTranslate(30, 15);
+    ofScale(0.5, 0.5);
+    for(int i = 0; i < 4; i++){
+        ofSetColor(255,0,0,100);
+        
+        if (i == pointSelected)
+            ofFill();
+        else
+            ofNoFill();
+        
+        ofRect(srcPoints[i].x-7,srcPoints[i].y-7,14,14);
+        ofLine(srcPoints[i], srcPoints[(i+1)%4]);
+    }
+    ofPopMatrix();
+    ofPopStyle();
+    
+    //  Draw Info panel
+    //
 	string str0 = "FPS: ";
 	str0+= ofToString(fps, 0)+"\n";
-
 	string str1 = "Resolution: ";
 	str1+= ofToString(camWidth, 0) + "x" + ofToString(camHeight, 0)  + "\n";
-
 	string str2 = "Blobs: ";
 	str2+= ofToString(contourFinder.nBlobs,0)+", "+ofToString(contourFinder.nObjects,0)+"\n";
-
 	string str3 = "Fingers: ";
 	str3+= ofToString(contourFinder.nFingers,0)+"\n";
-
-	ofColor c;
-	c.setHex(0x969696);
-	ofSetColor(c);
+	ofSetHexColor(0x969696);
 	verdana.drawString( str0 + str1 + str2 + str3, 570, 430);
 
-
-	//TUIO data drawing
-		char buf[256]="";
-		if(myTUIO.bOSCMode && myTUIO.bTCPMode)
-			sprintf(buf, "Dual Mode");
-		else if(myTUIO.bOSCMode)
-			sprintf(buf, "Host: %s\nProtocol: UDP [OSC]\nPort: %i", myTUIO.localHost, myTUIO.TUIOPort);
-		else if(myTUIO.bTCPMode){
-			if(myTUIO.bIsConnected)
-				sprintf(buf, "Host: %s\nProtocol: TCP [XML]\nPort: %i", myTUIO.localHost, myTUIO.TUIOFlashPort);
-			else
-				sprintf(buf, "Binding Error\nHost: %s\nProtocol: TCP [XML]\nPort: %i", myTUIO.localHost, myTUIO.TUIOFlashPort);
-		}else if(myTUIO.bBinaryMode){
-			if(myTUIO.bIsConnected)
-				sprintf(buf, "Host: %s\nProtocol: Binary\nPort: %i", myTUIO.localHost, myTUIO.TUIOFlashPort);
-			else
-				sprintf(buf, "Binding Error\nHost: %s\nProtocol: Binary\nPort: %i", myTUIO.localHost, myTUIO.TUIOFlashPort);
-		}
-
-		ofSetColor(c);
-		verdana.drawString(buf, 573, 515);
-
+	//  Draw TUIO data 
+    //
+    char buf[256]="";
+    if(myTUIO.bOSCMode && myTUIO.bTCPMode)
+        sprintf(buf, "Dual Mode");
+    else if(myTUIO.bOSCMode)
+        sprintf(buf, "Host: %s\nProtocol: UDP [OSC]\nPort: %i", myTUIO.localHost, myTUIO.TUIOPort);
+    else if(myTUIO.bTCPMode){
+        if(myTUIO.bIsConnected)
+            sprintf(buf, "Host: %s\nProtocol: TCP [XML]\nPort: %i", myTUIO.localHost, myTUIO.TUIOFlashPort);
+        else
+            sprintf(buf, "Binding Error\nHost: %s\nProtocol: TCP [XML]\nPort: %i", myTUIO.localHost, myTUIO.TUIOFlashPort);
+    } else if(myTUIO.bBinaryMode){
+        if(myTUIO.bIsConnected)
+            sprintf(buf, "Host: %s\nProtocol: Binary\nPort: %i", myTUIO.localHost, myTUIO.TUIOFlashPort);
+        else
+            sprintf(buf, "Binding Error\nHost: %s\nProtocol: Binary\nPort: %i", myTUIO.localHost, myTUIO.TUIOFlashPort);
+    }
+	ofSetHexColor(0x969696);
+    verdana.drawString(buf, 573, 515);
 }
 
 void ofxKCoreVision::drawMiniMode(){
-	//black background
-	ofSetColor(0,0,0);
+	//  Black background
+    //
+	ofSetColor(0);
 	ofRect(0,0,ofGetWidth(), ofGetHeight());
 
-	//draw outlines
+	//  Draw outlines
 	if (bDrawOutlines){
 		for (int i=0; i<contourFinder.nBlobs; i++)
 			contourFinder.blobs[i].drawContours(0,0, camWidth, camHeight+175, ofGetWidth(), ofGetHeight());
@@ -468,21 +514,24 @@ void ofxKCoreVision::drawMiniMode(){
 			contourFinder.objects[i].drawBox(0,0, camWidth, camHeight+175, ofGetWidth(), ofGetHeight());
 	}
 
-	//draw grey rectagles for text information
-	ofSetColor(128,128,128);
+	//  Draw grey rectagles for text information
+    //
+	ofSetColor(128);
 	ofFill();
 	ofRect(0,ofGetHeight() - 83, ofGetWidth(), 20);
 	ofRect(0,ofGetHeight() - 62, ofGetWidth(), 20);
 	ofRect(0,ofGetHeight() - 41, ofGetWidth(), 20);
 	ofRect(0,ofGetHeight() - 20, ofGetWidth(), 20);
 
-	//draw text
-	ofSetColor(250,250,250);
+	//  Draw text
+    //
+	ofSetColor(250);
 	verdana.drawString(" [ms]:" + ofToString(differenceTime,0),10, ofGetHeight() - 70 );
 	verdana.drawString("[fps]:" + ofToString(fps,0),10, ofGetHeight() - 50 );
 
-	//draw green tuio circle
-	if((myTUIO.bIsConnected || myTUIO.bOSCMode) && bTUIOMode)
+	//  Draw green tuio circle
+	//
+    if((myTUIO.bIsConnected || myTUIO.bOSCMode) && bTUIOMode)
 		ofSetColor(0,255,0);	//green = connected
 	else
 		ofSetColor(255,0,0);	//red = not connected
@@ -491,9 +540,11 @@ void ofxKCoreVision::drawMiniMode(){
 	ofNoFill();
 }
 
-void ofxKCoreVision::drawFingerOutlines(){
-
-	//Find the blobs for drawing
+void ofxKCoreVision::drawOutlines(){
+    ofPushStyle();
+    
+	//  Find the blobs for drawing
+    //
 	if(contourFinder.bTrackBlobs){
 		for (int i=0; i<contourFinder.nBlobs; i++){
 
@@ -513,7 +564,8 @@ void ofxKCoreVision::drawFingerOutlines(){
 		}
 	}
 
-	//Find the blobs for drawing
+	//  Find the blobs for drawing
+    //
 	if(contourFinder.bTrackFingers){
 		for (int i=0; i<contourFinder.nFingers; i++) {
 
@@ -534,7 +586,8 @@ void ofxKCoreVision::drawFingerOutlines(){
 		}
 	}
 
-	//Object Drawing
+	//  Object Drawing
+    //
 	if(contourFinder.bTrackObjects){
 		for (int i=0; i<contourFinder.nObjects; i++){
 
@@ -554,9 +607,7 @@ void ofxKCoreVision::drawFingerOutlines(){
 			}
 		}
 	}
-
-
-	ofSetColor(255);
+	ofPopStyle();
 }
 
 /*****************************************************************************
@@ -700,9 +751,6 @@ void ofxKCoreVision::_keyReleased(ofKeyEventArgs &e){
 	if ( e.key == '~' || e.key == '`' && !bMiniMode && !bCalibration) showConfiguration = !showConfiguration;
 }
 
-/*****************************************************************************
-*	MOUSE EVENTS
-*****************************************************************************/
 void ofxKCoreVision::_mouseDragged(ofMouseEventArgs &e){
 	if (showConfiguration)
 		controls->mouseDragged(e.x, e.y, e.button); //guilistener
@@ -759,21 +807,17 @@ void ofxKCoreVision::_mouseReleased(ofMouseEventArgs &e)
 	}
 }
 
-/*****************************************************************************
-* ON EXIT
-*****************************************************************************/
 void ofxKCoreVision::_exit(ofEventArgs &e){
-	//kinect.close();
-	saveSettings();
+	kinect.close();
 
-	//Save templates
-	if(contourFinder.bTrackObjects)
+	//  Save Settings 
+	saveXMLSettings();
+    if(contourFinder.bTrackObjects)
 		templates.saveTemplateXml();
 
-	// AlexP
-	// C++ guarantees that operator delete checks its argument for null-ness
-	delete filter;		filter = NULL;
-	// -------------------------------- SAVE STATE ON EXIT
-	printf("Vision module has exited!\n");
+	delete filter;
+    filter = NULL;
+	
+    printf("Vision module has exited!\n");
 }
 

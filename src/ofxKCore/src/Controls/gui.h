@@ -404,7 +404,7 @@ void ofxKCoreVision ::handleGui(int parameterId, int task, void* data, int lengt
 				if(*(bool*)data)
 				{
 					controls->saveToXml(OFXGUI_XML);
-					saveSettings();
+					saveXMLSettings();
 				}
 			}
 			break;

@@ -70,16 +70,13 @@
 
 //Used for tracking algo
 #include "Tracking/Tracking.h"
+
 //Object Trackin
 #include "Templates/TemplateUtils.h"
 
 //image filters
-//#include "Filters/GPUImageFilter.h"
 #include "Filters/CPUImageFilter.h"
 #include "Filters/ProcessFilters.h"
-
-//Used for warped image calibration
-//#include "Calibration/boxAlign.h"
 
 //Used other calibration
 #include "Calibration/CalibrationUtils.h"

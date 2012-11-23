@@ -13,29 +13,39 @@
 #include "ofMain.h"
 #include "ofxOpenCv.h"
 #include "CPUImageFilter.h"
-//#include "GPUImageFilter.h"
 
 #define CAMERA_EXPOSURE_TIME  2200.0f
 
 class Filters {
+public:
 
-	public:
-
-	  Filters(){
-
+    Filters(){
 		camWidth = 320*2;
 		camHeight = 240*2;
 		exposureStartTime = CAMERA_EXPOSURE_TIME;
 
-		//filter values
-		threshold = 120;
-		smooth = 0;
-		highpassBlur = 0;
-		highpassNoise = 0;
-		highpassAmp = 0;
-		fLearnRate = 1;
-	  }
+		//  filter values
+        //
+		threshold       = 120;
+		smooth          = 0;
+		highpassBlur    = 0;
+		highpassNoise   = 0;
+		highpassAmp     = 0;
+		fLearnRate      = 1;
+    }
 
+    virtual void allocate( int w, int h ) = 0;
+    virtual void applyFilters(CPUImageFilter& img) = 0;
+    virtual void draw() = 0;
+
+    ofxCvGrayscaleImage grayImg;
+    ofxCvGrayscaleImage grayBg;
+    ofxCvGrayscaleImage subtractBg;
+    ofxCvGrayscaleImage grayDiff;
+    ofxCvGrayscaleImage highpassImg;
+    ofxCvGrayscaleImage ampImg;
+	ofxCvShortImage		floatBgImg;
+    
     int camWidth;
     int camHeight;
     int exposureStartTime;
@@ -61,40 +71,6 @@ class Filters {
 	bool bTrackDark;
     bool bLearnBakground;
 	bool bMiniMode;
-
-    //CPU
-    ofxCvGrayscaleImage grayImg;
-    ofxCvGrayscaleImage grayBg;
-    ofxCvGrayscaleImage subtractBg;
-    ofxCvGrayscaleImage grayDiff;
-    ofxCvGrayscaleImage highpassImg;
-    ofxCvGrayscaleImage ampImg;
-	ofxCvShortImage		floatBgImg;
-
-
-    //GPU
-//    GLuint			gpuBGTex;
-//    GLuint			gpuSourceTex;
-//    ofxCvGrayscaleImage gpuReadBackImageGS;
-//	unsigned char  * gpuReadBackBuffer;
-//    GPUImageFilter * contrastFilter;
-//    GPUImageFilter * subtractFilter;
-//    GPUImageFilter * subtractFilter2; //we need 2 because we are showing the output of each
-//    GPUImageFilter * gaussVFilter;
-//    GPUImageFilter * gaussVFilter2;
-//    GPUImageFilter * gaussHFilter;
-//    GPUImageFilter * gaussHFilter2;
-//    GPUImageFilter * threshFilter;
-//    GPUImageFilter * copyFilter;
-//    GPUImageFilter * grayScale;
-
-    virtual void allocate( int w, int h ) = 0;
-    virtual void applyCPUFilters(CPUImageFilter& img) = 0;
-    virtual void draw() = 0;
-
-//    virtual void allocateGPU() = 0;
-//    virtual void applyGPUFilters() = 0;
-//    virtual void drawGPU() = 0;
 };
 
 

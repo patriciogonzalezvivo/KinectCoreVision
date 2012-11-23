@@ -830,8 +830,8 @@
 			isa = PBXGroup;
 			children = (
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
-				E4B69E1E0A3A1BDC003C02F2 /* testApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* testApp.h */,
+				E4B69E1E0A3A1BDC003C02F2 /* testApp.cpp */,
 				805fd14bab872bcf22227f5eb078aaa5 /* ofxKCore */,
 			);
 			path = src;
@@ -977,8 +977,8 @@
 				b4c61d6a0a106b3bfb2036dacb023a20 /* Events */,
 				dc6152e1f9ab4ea0bb5d8534cd08a0ef /* Filters */,
 				1423c6a2f7e25d7ef8fd36e958383360 /* ofxKCore.h */,
-				db4bc9a2723e5e01603bcfa4284fbee6 /* ofxKCoreVision.cpp */,
 				2b3a86d0d7691cd2e0a4160c208ce4a0 /* ofxKCoreVision.h */,
+				db4bc9a2723e5e01603bcfa4284fbee6 /* ofxKCoreVision.cpp */,
 				ae6cd04042ff8f60d44b3642f4a64c89 /* Templates */,
 				4673ccc7faca9ddd498c1bb8b41ab219 /* Tracking */,
 			);
