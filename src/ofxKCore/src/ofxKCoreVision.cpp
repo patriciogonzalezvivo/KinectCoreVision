@@ -68,11 +68,11 @@ void ofxKCoreVision::_setup(ofEventArgs &e){
 
 	//  Allocate images (needed for drawing/processing images)
     //
+    sourceImg.allocate(camWidth, camHeight);    //  Source Image
+	sourceImg.setUseTexture(false);				//  We don't need to draw this so don't create a texture
 	processedImg.allocate(camWidth, camHeight); //  main Image that'll be processed.
 	processedImg.setUseTexture(false);			//  We don't need to draw this so don't create a texture
-	sourceImg.allocate(camWidth, camHeight);    //  Source Image
-	sourceImg.setUseTexture(false);				//  We don't need to draw this so don't create a texture
-
+    
 	//  GUI Stuff
     //
 	verdana.loadFont("verdana.ttf", 8, true, true);
@@ -133,7 +133,7 @@ bool ofxKCoreVision::loadXMLSettings(){
             
             nearThreshold				= XML.getValue("KINECT:NEAR",600);
             farThreshold				= XML.getValue("KINECT:FAR",700);
-        
+
             XML.pushTag("WARP");
             for(int i = 0; i < 4; i++){
                 XML.pushTag("POINT",i);
@@ -144,7 +144,6 @@ bool ofxKCoreVision::loadXMLSettings(){
             XML.popTag();
             
             maxBlobs					= XML.getValue("BLOBS:MAXNUMBER", 20);
-            
             
             backgroundLearnRate			= XML.getValue("INT:BGLEARNRATE", 0.01f);
             
@@ -350,20 +349,11 @@ void ofxKCoreVision::_update(ofEventArgs &e){
             
             sourceImg.flagImageChanged();
         }
-        
-        //  Mirror if necesary
-        //
-        if (filter->bVerticalMirror || filter->bHorizontalMirror){
-            sourceImg.mirror(filter->bVerticalMirror, filter->bHorizontalMirror);
-        }
-        
-        //  TODO: this need to be done only when it's necesary
-        //
-        processedImg.warpIntoMe(sourceImg, srcPoints, dstPoints);   //  processedImg = sourceImg;
+        processedImg = sourceImg;
         
         //  Filter and Process
         //
-        filter->applyFilters( processedImg );
+        filter->applyFilters( processedImg, srcPoints, dstPoints );
         contourFinder.findContours(processedImg,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress, false);
 
 		//  If Object tracking or Finger tracking is enabled
@@ -436,9 +426,8 @@ void ofxKCoreVision::drawFullMode(){
     //
 	background.draw(0,0);
 
-    //  Draw Source
+    //  Draw Images
     //
-    sourceImg.draw(30, 15, 320, 240);
     filter->draw();
 
     //  Draw Warp Area
@@ -455,7 +444,7 @@ void ofxKCoreVision::drawFullMode(){
         else
             ofNoFill();
         
-        ofRect(srcPoints[i].x-7,srcPoints[i].y-7,14,14);
+        ofRect(srcPoints[i].x-7, srcPoints[i].y-7,14,14);
         ofLine(srcPoints[i], srcPoints[(i+1)%4]);
     }
     ofPopMatrix();
@@ -549,7 +538,7 @@ void ofxKCoreVision::drawOutlines(){
 		for (int i=0; i<contourFinder.nBlobs; i++){
 
 			if (bDrawOutlines) //Draw contours (outlines) on the source image
-				contourFinder.blobs[i].drawContours(30, 15, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
+				contourFinder.blobs[i].drawContours(375, 15, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
 
 			if (bShowLabels){ //Show ID label
 				float xpos = contourFinder.blobs[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);
@@ -570,7 +559,7 @@ void ofxKCoreVision::drawOutlines(){
 		for (int i=0; i<contourFinder.nFingers; i++) {
 
 			if (bDrawOutlines) //Draw contours (outlines) on the source image
-				contourFinder.fingers[i].drawCenter(30, 15, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
+				contourFinder.fingers[i].drawCenter(375, 15, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
 
 			if (bShowLabels){ //Show ID label
 				float xpos = contourFinder.fingers[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);
@@ -592,7 +581,7 @@ void ofxKCoreVision::drawOutlines(){
 		for (int i=0; i<contourFinder.nObjects; i++){
 
 			if (bDrawOutlines) //Draw contours (outlines) on the source image
-				contourFinder.objects[i].drawBox(40, 30, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
+				contourFinder.objects[i].drawBox(375, 30, camWidth, camHeight, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT);
 
 			if (bShowLabels){ //Show ID label
 				float xpos = contourFinder.objects[i].centroid.x * (MAIN_WINDOW_WIDTH/camWidth);

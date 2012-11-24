@@ -35,9 +35,10 @@ public:
     }
 
     virtual void allocate( int w, int h ) = 0;
-    virtual void applyFilters(CPUImageFilter& img) = 0;
+    virtual void applyFilters(CPUImageFilter& img, const ofPoint *src, const ofPoint *dst) = 0;
     virtual void draw() = 0;
 
+    ofxCvGrayscaleImage original;
     ofxCvGrayscaleImage grayImg;
     ofxCvGrayscaleImage grayBg;
     ofxCvGrayscaleImage subtractBg;

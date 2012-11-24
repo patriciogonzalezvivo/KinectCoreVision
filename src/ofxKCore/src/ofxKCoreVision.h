@@ -220,6 +220,8 @@ private:
     //  Kinect Device
     //
 	ofxKinect           kinect;
+    ofPoint             srcPoints[4];
+    ofPoint             dstPoints[4];
 	int					nearThreshold;
 	int					farThreshold;
 
@@ -266,9 +268,9 @@ private:
 
 	//  Image filters
     //
-	Filters*			filter;
+    ofxCvGrayscaleImage	sourceImg;
 	CPUImageFilter      processedImg;
-	ofxCvGrayscaleImage	sourceImg;
+    Filters*			filter;
 
 	//  XML Settings Vars
     //
@@ -292,8 +294,6 @@ private:
     
     //  Variables in config.xml Settings file
 	//
-    ofPoint             srcPoints[4];
-    ofPoint             dstPoints[4];
     int                 pointSelected;
 	float				backgroundLearnRate;
     float				hullPress;          //  For finger detection
