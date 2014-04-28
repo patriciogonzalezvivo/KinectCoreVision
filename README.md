@@ -1,25 +1,12 @@
-#[ Kinect Core Vision](http://patriciogonzalezvivo.com/kinectcorevision.html)
-[![kinect](http://patriciogonzalezvivo.com/2011/kinectcorevision/thumb.jpg)](http://patriciogonzalezvivo.com/kinectcorevision.html)
+<iframe class="roundPhoto" src="http://player.vimeo.com/video/20904879?autoplay=1" width="575" height="359" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
 
+**KinectCoreVision** is a refurnished version of the well know track application [CommunityCoreVision](http://ccv.nuigroup.com/) to use a KinectSensor.
 
-
-## Addons needed for compilation
-	
-* ofxOpenCv ( native )
-
-* ofxXmlSettings (native)
-
-* ofxNetwork (native)
-
-* ofxOsc (native)
-
-* ofxXmlSettings (native)
-
-* [ofxKinect](https://github.com/ofTheo/ofxKinect) (Read and follow instalation on Theos Repository)
+This version of CCV was original designed for a light and portable setup of [Communitas multiTouch](http://www.patriciogonzalezvivo.com/2010/communitas/) Table for IEATA´s 9th International Conference (more info and videos about it). But it was lot of potencial.
 
 # Binaries
 
-## MacOSX 
+**MacOSX** 
 
 * [Snow Leopard](https://dl.dropbox.com/u/335522/web/apps/KinectCoreVision-10.6.zip)
 * [Lion](https://dl.dropbox.com/u/335522/web/apps/KinectCoreVision.zip) 
@@ -30,18 +17,16 @@ Macports is required to be installed. Please check http://www.macports.org/ for 
 
 ```sudo port install libusb-devel +universal```
 
-## Linux
+**Linux**
 
 * [Ubuntu 64bit](https://dl.dropbox.com/u/335522/web/apps/KinectCoreVision-linux64.zip)
 
 ```sudo apt-get install libusb-1.0-0-dev```
 
-## Windows
+**Windows**
 
 * [Windows XP](https://dl.dropbox.com/u/335522/web/apps/KinectCoreVision-Win.zip)
 
-# Video Tutorial
-[CLICK HERE for more information and videos on how to setup and use it](http://patriciogonzalezvivo.com/kinectcorevision)
 
 
 

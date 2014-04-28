@@ -44,7 +44,7 @@ int ContourFinder::findContours(	ofxCvGrayscaleImage&  input,
 									int nConsidered,
 									double hullPress,	
 									bool bFindHoles,
-									bool bUseApproximation) {
+									bool bUseApproximation  ) {
 	reset();
 
 	// opencv will clober the image it detects contours on, so we want to
@@ -145,7 +145,7 @@ int ContourFinder::findContours(	ofxCvGrayscaleImage&  input,
 
 			objects.push_back(blob);
 			
-		} else if(bTrackBlobs) { // SEARCH FOR BLOBS
+		} else if ( bTrackBlobs ) { // SEARCH FOR BLOBS
 			float area = fabs( cvContourArea(contour_ptr, CV_WHOLE_SEQ) );
 			if( (area > minArea) && (area < maxArea) ) {
 				Blob blob=Blob();
@@ -196,7 +196,7 @@ int ContourFinder::findContours(	ofxCvGrayscaleImage&  input,
 		contour_ptr = contour_ptr->h_next;
 	}
 		
-	if(bTrackFingers) {  // SEARCH FOR FINGERS
+	if ( bTrackFingers ) {  // SEARCH FOR FINGERS
 		CvPoint*		PointArray;
 		int*			hull;
 		int				hullsize;

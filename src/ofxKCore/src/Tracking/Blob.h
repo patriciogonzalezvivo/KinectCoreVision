@@ -39,8 +39,7 @@ class Blob {
 		int					color;				
 
         //----------------------------------------
-        Blob() 
-		{
+        Blob() {
             area 		= 0.0f;
             length 		= 0.0f;
             hole 		= false;

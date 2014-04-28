@@ -44,9 +44,9 @@ public:
 	vector <Blob>	fingers;
 	vector <Blob>	objects;
 
-	bool bTrackBlobs;
-	bool bTrackFingers;
-	bool bTrackObjects;
+	bool            bTrackBlobs;
+	bool            bTrackFingers;
+	bool            bTrackObjects;
 
 protected:
 

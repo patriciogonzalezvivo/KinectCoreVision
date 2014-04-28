@@ -86,26 +86,7 @@ void ofxKCoreVision::setupControls()
 	panel2->mObjWidth = 200;
 	panel2->mObjHeight = 90;
 
-	//Tracked Image
-	ofxGuiPanel* trackPanel = controls->addPanel(appPtr->trackedPanel, "Tracked Image", 376, 255, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
-	trackPanel->addButton(appPtr->trackedPanel_darkblobs, "Inverse", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
-	trackPanel->addSlider(appPtr->trackedPanel_threshold, "Image Threshold", 140, 13, 0.0f, 255.0f, filter->threshold, kofxGui_Display_Int, 0);
-	trackPanel->addSlider(appPtr->trackedPanel_min_movement, "Movement Filtering", 140, 13, 0.0f, 15.0f, tracker.MOVEMENT_FILTERING, kofxGui_Display_Int, 0);
-	trackPanel->addSlider(appPtr->trackedPanel_min_blob_size, "Min Blob Size", 140, 13, 1.0f, 500.0f, MIN_BLOB_SIZE, kofxGui_Display_Int, 0);
-	trackPanel->addSlider(appPtr->trackedPanel_max_blob_size, "Max Blob Size", 140, 13, 1.0f, 1000.0f, MAX_BLOB_SIZE, kofxGui_Display_Int, 0);
-	trackPanel->mObjHeight = 120;
-	trackPanel->mObjWidth = 319;
-	trackPanel->mObjects[0]->mObjX = 120;
-	trackPanel->mObjects[0]->mObjY = 11;
-	trackPanel->mObjects[1]->mObjY = 32;
-	trackPanel->mObjects[2]->mObjX = 165;
-	trackPanel->mObjects[2]->mObjY = 32;
-	trackPanel->mObjects[3]->mObjY = 67;
-	trackPanel->mObjects[4]->mObjX = 165;
-	trackPanel->mObjects[4]->mObjY = 67;
-	trackPanel->adjustToNewContent(100, 0);
-
-	//Source Image
+    //Source Image
 	ofxGuiPanel* srcPanel = controls->addPanel(appPtr->sourcePanel, "Source Image", 31, 255, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
 	srcPanel->addButton(appPtr->trackedPanel_outlines, "Show Outlines (o)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
 	srcPanel->addButton(appPtr->trackedPanel_ids, "Show IDs (i)", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
@@ -123,6 +104,28 @@ void ofxKCoreVision::setupControls()
 	//srcPanel->mObjects[4]->mObjY = 42;
 	srcPanel->adjustToNewContent(100, 0);
 	srcPanel->mObjHeight = 60;
+    
+	//Tracked Image
+	ofxGuiPanel* trackPanel = controls->addPanel(appPtr->trackedPanel, "Tracked Image", 376, 255, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
+	trackPanel->addButton(appPtr->trackedPanel_xz, "XZ", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
+    trackPanel->addButton(appPtr->trackedPanel_darkblobs, "Inverse", OFXGUI_BUTTON_HEIGHT, OFXGUI_BUTTON_HEIGHT, kofxGui_Button_Off, kofxGui_Button_Switch);
+	trackPanel->addSlider(appPtr->trackedPanel_threshold, "Image Threshold", 140, 13, 0.0f, 255.0f, filter->threshold, kofxGui_Display_Int, 0);
+	trackPanel->addSlider(appPtr->trackedPanel_min_movement, "Movement Filtering", 140, 13, 0.0f, 15.0f, tracker.MOVEMENT_FILTERING, kofxGui_Display_Int, 0);
+	trackPanel->addSlider(appPtr->trackedPanel_min_blob_size, "Min Blob Size", 140, 13, 1.0f, 500.0f, MIN_BLOB_SIZE, kofxGui_Display_Int, 0);
+	trackPanel->addSlider(appPtr->trackedPanel_max_blob_size, "Max Blob Size", 140, 13, 1.0f, 1000.0f, MAX_BLOB_SIZE, kofxGui_Display_Int, 0);
+	trackPanel->mObjHeight = 120;
+	trackPanel->mObjWidth = 319;
+	trackPanel->mObjects[0]->mObjX = 120;
+	trackPanel->mObjects[0]->mObjY = 11;
+    trackPanel->mObjects[1]->mObjX = 165;
+    trackPanel->mObjects[1]->mObjY = 11;
+	trackPanel->mObjects[2]->mObjY = 32;
+	trackPanel->mObjects[3]->mObjX = 165;
+	trackPanel->mObjects[3]->mObjY = 32;
+	trackPanel->mObjects[4]->mObjY = 67;
+	trackPanel->mObjects[5]->mObjX = 165;
+	trackPanel->mObjects[5]->mObjY = 67;
+	trackPanel->adjustToNewContent(100, 0);
 
 	//Distance (ex template)
 	ofxGuiPanel* tPanel = controls->addPanel(appPtr->TemplatePanel, "Distance between:", 31, 315, OFXGUI_PANEL_BORDER, OFXGUI_PANEL_SPACING);
@@ -211,6 +214,7 @@ void ofxKCoreVision::setupControls()
 	controls->update(appPtr->trackedPanel_max_blob_size, kofxGui_Set_Bool, &appPtr->MAX_BLOB_SIZE, sizeof(float));
 	//Hull Convex Pressition
 	//controls->update(appPtr->trackedPanel_hullPress, kofxGui_Set_Bool, &appPtr->hullPress, sizeof(float));
+    controls->update(appPtr->trackedPanel_xz, kofxGui_Set_Bool, &appPtr->isXZ, sizeof(bool));
 	//Template Area
 	controls->update(appPtr->TemplatePanel_minArea, kofxGui_Set_Bool, &appPtr->minTempArea, sizeof(float));
 	controls->update(appPtr->TemplatePanel_maxArea, kofxGui_Set_Bool, &appPtr->maxTempArea, sizeof(float));

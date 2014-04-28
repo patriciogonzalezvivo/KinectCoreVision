@@ -616,10 +616,10 @@
 			isa = PBXGroup;
 			children = (
 				3889d6ccb3a32cb9f0d3a2f0bda60985 /* Blob.h */,
-				e517375cb1f924ddf12986f06c6065d7 /* BlobManager.cpp */,
 				81034846f53ca78db40cb65e577f2bb1 /* BlobManager.h */,
-				f02597d6c1a8cb3cf9c0712aea0ba6dc /* ContourFinder.cpp */,
+				e517375cb1f924ddf12986f06c6065d7 /* BlobManager.cpp */,
 				ea45afdea806754344c8c1fc459c2991 /* ContourFinder.h */,
+				f02597d6c1a8cb3cf9c0712aea0ba6dc /* ContourFinder.cpp */,
 				ce1487c61e8f85d121cb9ee4b451ce02 /* Tracking.cpp */,
 				017a682160e91b460856c4759d46da40 /* Tracking.h */,
 			);
@@ -927,8 +927,8 @@
 		c170d97641d44f3e5ee433fafa88762b /* Communication */ = {
 			isa = PBXGroup;
 			children = (
-				9b093539a7ba6ba58375cea7bc20d37d /* TUIO.cpp */,
 				b1c5fcf3e8b2a5c7cdc2748d0ccbe196 /* TUIO.h */,
+				9b093539a7ba6ba58375cea7bc20d37d /* TUIO.cpp */,
 			);
 			name = Communication;
 			sourceTree = "<group>";

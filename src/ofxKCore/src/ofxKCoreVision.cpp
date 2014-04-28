@@ -189,6 +189,8 @@ bool ofxKCoreVision::loadXMLSettings(){
             contourFinder.bTrackFingers	= XML.getValue("BOOLEAN:TRACKFINGERS",0);
             contourFinder.bTrackObjects	= XML.getValue("BOOLEAN:TRACKOBJECTS",0);
             
+            isXZ                        = XML.getValue("BOOLEAN:XY", 0);
+            
             //  NETWORK SETTINGS
             //
             bTUIOMode					= XML.getValue("BOOLEAN:TUIO",0);
@@ -252,6 +254,7 @@ bool ofxKCoreVision::saveXMLSettings(){
 	XML.setValue("CONFIG:BOOLEAN:TRACKBLOBS",contourFinder.bTrackBlobs);
 	XML.setValue("CONFIG:BOOLEAN:TRACKFINGERS",contourFinder.bTrackFingers);
 	XML.setValue("CONFIG:BOOLEAN:TRACKOBJECTS",contourFinder.bTrackObjects);
+    XML.setValue("CONFIG:BOOLEAN:XZ", isXZ);
 	XML.setValue("CONFIG:BOOLEAN:HEIGHTWIDTH", myTUIO.bHeightWidth);
 	XML.setValue("CONFIG:BOOLEAN:OSCMODE", myTUIO.bOSCMode);
 	XML.setValue("CONFIG:BOOLEAN:TCPMODE", myTUIO.bTCPMode);
@@ -273,7 +276,8 @@ bool ofxKCoreVision::saveXMLSettings(){
 * The update function runs continuously. Use it to update states and variables
 *****************************************************************************/
 void ofxKCoreVision::_update(ofEventArgs &e){
-	if(debugMode) if((stream = freopen(fileName, "a", stdout)) == NULL){}
+	if(debugMode)
+        if((stream = freopen(fileName, "a", stdout)) == NULL){}
 
     //  Dragable Warp points
     //
@@ -313,10 +317,10 @@ void ofxKCoreVision::_update(ofEventArgs &e){
     
     kinect.update();
 	bNewFrame = true;
-	if(!bNewFrame){
+    
+	if ( !bNewFrame ){
 		return;			//if no new frame, return
 	} else {			//else process camera frame
-		ofBackground(0, 0, 0);
 
 		// Calculate FPS of Camera
         //
@@ -333,7 +337,7 @@ void ofxKCoreVision::_update(ofEventArgs &e){
 
         //  Get Pixels from the Kinect
         //
-        if(kinect.isFrameNew()) {
+        if( kinect.isFrameNew() ) {
             
             const float* depthRaw = kinect.getDistancePixels();
             unsigned char * depthPixels = sourceImg.getPixels();
@@ -342,7 +346,7 @@ void ofxKCoreVision::_update(ofEventArgs &e){
             
             for(int i = 0; i < numPixels; i++, depthRaw++) {
                 if((*depthRaw <= farThreshold) && (*depthRaw >= nearThreshold))
-                    depthPixels[i] = ofMap(*depthRaw, nearThreshold, farThreshold, 255,0);
+                    depthPixels[i] = ofMap(*depthRaw, nearThreshold, farThreshold, 255,0, true);
                 else
                     depthPixels[i] = 0;
             }
@@ -355,6 +359,30 @@ void ofxKCoreVision::_update(ofEventArgs &e){
         //
         filter->applyFilters( processedImg, srcPoints, dstPoints );
         contourFinder.findContours(processedImg,  (MIN_BLOB_SIZE * 2) + 1, ((camWidth * camHeight) * .4) * (MAX_BLOB_SIZE * .001), maxBlobs, (double) hullPress, false);
+        
+        //  If XZ is
+        if (isXZ){
+            if ( contourFinder.bTrackBlobs ){
+                for (int i = 0; i < contourFinder.blobs.size(); i++){
+                    ofPoint pos = contourFinder.blobs[i].centroid;
+                    contourFinder.blobs[i].centroid.y = kinect.getDistanceAt(pos);
+                }
+            }
+            
+            if ( contourFinder.bTrackFingers ){
+                for (int i = 0; i < contourFinder.fingers.size(); i++){
+                    ofPoint pos = contourFinder.fingers[i].centroid;
+                    contourFinder.fingers[i].centroid.y = kinect.getDistanceAt(pos);
+                }
+            }
+            
+            if ( contourFinder.bTrackObjects ){
+                for (int i = 0; i < contourFinder.objects.size(); i++){
+                    ofPoint pos = contourFinder.objects[i].centroid;
+                    contourFinder.objects[i].centroid.y = kinect.getDistanceAt(pos);
+                }
+            }
+        }
 
 		//  If Object tracking or Finger tracking is enabled
 		//

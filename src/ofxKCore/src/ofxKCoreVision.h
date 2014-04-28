@@ -73,6 +73,7 @@ enum {
 		highpassPanel_noise,
 
 		trackedPanel,
+        trackedPanel_xz,
 		trackedPanel_darkblobs,
 		trackedPanel_use,
 		trackedPanel_threshold,
@@ -249,6 +250,7 @@ private:
 	//  Object Selection bools
     //
 	bool				isSelecting;
+    bool                isXZ;
     
 	string				videoFileName;
 
